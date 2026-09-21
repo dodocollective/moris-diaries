@@ -638,89 +638,211 @@
     font-size: 12.5px;
   }
 
-  /* ================= POPULAR EXCURSIONS (Supabase) ================= */
+  /* ================= EXCURSIONS & ACTIVITIES — NETFLIX-STYLE ROWS (Supabase) ================= */
 
   .activities-wrap { margin-bottom: 30px; }
 
-  .activities-scroll {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
+  .activities-disclosure {
+    text-align: center;
+    font-size: 11.5px;
+    color: var(--stone);
+    line-height: 1.5;
+    max-width: 460px;
+    margin: 8px auto 0;
   }
+
+  .activities-filter {
+    display: flex;
+    justify-content: center;
+    gap: 26px;
+    border-bottom: 1px solid rgba(245,240,230,0.1);
+    margin-bottom: 26px;
+    flex-wrap: wrap;
+  }
+  .filter-tab {
+    appearance: none;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 0 0 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--stone);
+    cursor: pointer;
+  }
+  .filter-tab:hover { color: var(--sand-dim); }
+  .filter-tab.active { color: var(--sand); border-bottom-color: var(--clay); }
+
+  .activities-filter-type {
+    border-bottom: none;
+    gap: 18px;
+    margin-top: -14px;
+  }
+  .activities-filter-type .filter-tab {
+    font-size: 11px;
+    padding-bottom: 8px;
+    border-bottom-width: 1px;
+  }
+  .activities-filter-type .filter-tab.active { border-bottom-color: var(--lagoon); }
+
+  .activity-row { margin-bottom: 26px; }
+
+  .activity-row-head {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+    margin-bottom: 12px;
+    padding: 0 2px;
+  }
+
+  .activity-row-title { font-family: 'Fraunces', serif; font-weight: 500; font-size: 16px; }
+  .activity-row-sub { font-size: 11px; color: var(--stone); }
+
+  .activity-row-viewport { position: relative; }
+  .activity-row-tracks { display: flex; flex-direction: column; gap: 14px; }
+
+  .row-nav {
+    display: none;
+    position: absolute;
+    top: 0;
+    bottom: 10px;
+    width: 44px;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    color: var(--sand);
+    z-index: 3;
+    transition: opacity 0.15s ease;
+  }
+  .row-nav svg { width: 16px; height: 16px; }
+  .row-nav-prev { left: -6px; background: linear-gradient(90deg, rgba(14,26,23,0.92) 30%, rgba(14,26,23,0)); justify-content: flex-start; padding-left: 2px; }
+  .row-nav-next { right: -6px; background: linear-gradient(270deg, rgba(14,26,23,0.92) 30%, rgba(14,26,23,0)); justify-content: flex-end; padding-right: 2px; }
+  .row-nav[disabled] { opacity: 0; pointer-events: none; }
+  @media (min-width: 640px) {
+    .row-nav { display: flex; }
+  }
+
+  .provider-tag {
+    display: inline-flex;
+    align-items: center;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .provider-tag.tag-direct { background: rgba(61,122,107,0.2); color: var(--lagoon); }
+  .provider-tag.tag-viator { background: rgba(201,98,45,0.18); color: var(--clay); }
+  .provider-tag.tag-getyourguide { background: rgba(245,240,230,0.08); color: rgba(245,240,230,0.6); border: 1px dashed rgba(245,240,230,0.3); }
+
+  .activity-row-scroll {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    padding: 4px 2px 10px;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    cursor: grab;
+  }
+  .activity-row-scroll.dragging { cursor: grabbing; scroll-snap-type: none; }
+  .activity-row-scroll::-webkit-scrollbar { height: 6px; }
+  .activity-row-scroll::-webkit-scrollbar-thumb { background: rgba(245,240,230,0.15); border-radius: 4px; }
+
+  .activity-card img { -webkit-user-drag: none; user-select: none; }
 
   .activity-card {
     position: relative;
+    flex: 0 0 auto;
+    width: 200px;
+    scroll-snap-align: start;
     background: rgba(245,240,230,0.04);
     border: 1px solid rgba(245,240,230,0.12);
-    border-radius: 3px;
+    border-radius: 4px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
     text-decoration: none;
     color: inherit;
-    transition: border-color 0.2s ease, transform 0.15s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   }
   .activity-card:hover, .activity-card:focus-visible {
-    border-color: rgba(245,240,230,0.28);
-    transform: translateY(-2px);
+    transform: scale(1.06) translateY(-4px);
+    border-color: rgba(245,240,230,0.3);
+    box-shadow: 0 24px 44px -16px rgba(0,0,0,0.6);
     outline: none;
+    z-index: 2;
   }
 
+  .activity-photo, .activity-photo-fallback { width: 100%; aspect-ratio: 4 / 3; }
+
   .activity-photo {
-    width: 100%;
-    aspect-ratio: 4 / 3;
     object-fit: cover;
     display: block;
     background: rgba(245,240,230,0.05);
   }
 
   .activity-photo-fallback {
-    width: 100%;
-    aspect-ratio: 4 / 3;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 14px;
     text-align: center;
     font-family: 'Fraunces', serif;
-    font-size: 13px;
+    font-size: 12.5px;
     color: rgba(245,240,230,0.4);
     background: rgba(245,240,230,0.05);
   }
 
+  .activity-play {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(14,26,23,0.25);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  .activity-card:hover .activity-play, .activity-card:focus-visible .activity-play { opacity: 1; }
+  .activity-play-dot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(245,240,230,0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   .activity-category {
     position: absolute;
-    top: 10px;
-    left: 10px;
+    top: 8px;
+    left: 8px;
     background: rgba(14,26,23,0.75);
     color: var(--sand-dim);
-    font-size: 9.5px;
+    font-size: 9px;
     font-weight: 700;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
-    padding: 4px 8px;
+    padding: 3px 7px;
     border-radius: 20px;
     backdrop-filter: blur(2px);
   }
 
-  .activity-body { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
-  .activity-title { font-family: 'Fraunces', serif; font-size: 14.5px; font-weight: 500; line-height: 1.3; }
-  .activity-meta { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--stone); }
+  .activity-body { padding: 11px 12px 12px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+  .activity-title { font-family: 'Fraunces', serif; font-size: 13px; font-weight: 500; line-height: 1.3; }
+  .activity-meta { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--stone); }
   .activity-meta .star { color: var(--clay); }
-  .activity-foot { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 2px; }
-  .activity-price { font-size: 11.5px; color: var(--stone); }
-  .activity-price b { color: var(--sand); font-size: 13.5px; font-weight: 600; }
-  .book-pill {
-    display: flex; align-items: center; gap: 4px;
-    background: rgba(201,98,45,0.18);
-    color: var(--clay);
-    font-size: 11px;
-    font-weight: 700;
-    padding: 6px 10px;
-    border-radius: 20px;
-    white-space: nowrap;
-  }
-  .book-pill svg { width: 11px; height: 11px; }
+  .activity-foot { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 2px; gap: 8px; }
+  .activity-price { font-size: 10.5px; color: var(--stone); white-space: nowrap; }
+  .activity-price b { color: var(--sand); font-size: 12.5px; font-weight: 600; }
 
   .activity-card.skeleton { pointer-events: none; }
   .activity-card.skeleton .activity-photo-fallback,
@@ -869,11 +991,11 @@
     .routes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
     .route-card { height: 100%; }
 
-    .activities-scroll { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .activity-card { width: 220px; }
   }
 
-  /* ================= DESKTOP — 1024px+ ================= */
-  @media (min-width: 1024px) {
+  /* ================= DESKTOP — 960px+ ================= */
+  @media (min-width: 960px) {
     .topbar { display: flex; }
 
     .page-wrap { padding: 0 40px 96px; }
@@ -912,7 +1034,8 @@
 
     .routes { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
 
-    .activities-scroll { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .activity-card { width: 240px; }
+    .activity-row-scroll { gap: 18px; }
 
     .itin-form { width: 100%; max-width: 460px; padding: 26px; }
 
@@ -1148,14 +1271,23 @@
   <div class="activities-wrap" id="activities">
     <div class="module-eyebrow">✦ Excursions &amp; Activities</div>
     <h2 class="module-h2">Book an Activity</h2>
-    <p class="module-sub">The full list, live from the app — booked direct or through our tour partners.</p>
+    <p class="module-sub">The full list, live from the app — browse it like a watchlist, booked direct or through our tour partners.</p>
 
-    <div class="activities-scroll" id="activitiesScroll" aria-live="polite">
-      <div class="activity-card skeleton"><div class="activity-photo-fallback">Loading…</div><div class="activity-body"><div class="activity-title">Loading activity</div><div class="activity-meta">Loading</div><div class="activity-foot"><div class="activity-price">from €0.00</div><div class="book-pill">Book</div></div></div></div>
-      <div class="activity-card skeleton"><div class="activity-photo-fallback">Loading…</div><div class="activity-body"><div class="activity-title">Loading activity</div><div class="activity-meta">Loading</div><div class="activity-foot"><div class="activity-price">from €0.00</div><div class="book-pill">Book</div></div></div></div>
-      <div class="activity-card skeleton"><div class="activity-photo-fallback">Loading…</div><div class="activity-body"><div class="activity-title">Loading activity</div><div class="activity-meta">Loading</div><div class="activity-foot"><div class="activity-price">from €0.00</div><div class="book-pill">Book</div></div></div></div>
-      <div class="activity-card skeleton"><div class="activity-photo-fallback">Loading…</div><div class="activity-body"><div class="activity-title">Loading activity</div><div class="activity-meta">Loading</div><div class="activity-foot"><div class="activity-price">from €0.00</div><div class="book-pill">Book</div></div></div></div>
+    <div class="activities-filter" id="activitiesFilter" role="tablist" style="display:none;"></div>
+    <div class="activities-filter activities-filter-type" id="activitiesTypeFilter" role="tablist" style="display:none;"></div>
+
+    <div id="activitiesRows" aria-live="polite">
+      <div class="activity-row">
+        <div class="activity-row-head"><span class="activity-row-title">Loading activities…</span></div>
+        <div class="activity-row-scroll">
+          <div class="activity-card skeleton"><div class="activity-photo-fallback">Loading…</div><div class="activity-body"><div class="activity-title">Loading activity</div><div class="activity-meta">Loading</div><div class="activity-foot"><div class="activity-price">from €0.00</div></div></div></div>
+          <div class="activity-card skeleton"><div class="activity-photo-fallback">Loading…</div><div class="activity-body"><div class="activity-title">Loading activity</div><div class="activity-meta">Loading</div><div class="activity-foot"><div class="activity-price">from €0.00</div></div></div></div>
+          <div class="activity-card skeleton"><div class="activity-photo-fallback">Loading…</div><div class="activity-body"><div class="activity-title">Loading activity</div><div class="activity-meta">Loading</div><div class="activity-foot"><div class="activity-price">from €0.00</div></div></div></div>
+          <div class="activity-card skeleton"><div class="activity-photo-fallback">Loading…</div><div class="activity-body"><div class="activity-title">Loading activity</div><div class="activity-meta">Loading</div><div class="activity-foot"><div class="activity-price">from €0.00</div></div></div></div>
+        </div>
+      </div>
     </div>
+    <p class="activities-disclosure" id="activitiesDisclosure" style="display:none;">Some activities on this page are booked through travel affiliates — we may earn a small commission on qualifying bookings, at no extra cost to you.</p>
   </div>
 
   <div class="social-row">
@@ -1322,7 +1454,10 @@
 
 <script>
   // Excursions & Activities — pulled live from Supabase `activities` (the app's real, full
-  // catalogue, joined with `posts` for a photo and `providers` for the operator's contact info).
+  // catalogue, joined with `posts` for a photo and `providers` for the operator's contact info),
+  // then grouped client-side into Netflix-style rows by provider. A row only renders once it has
+  // at least one matching activity, so the GetYourGuide row appears on its own the moment
+  // GetYourGuide rows exist in the table — no separate launch flag to flip.
   // All three tables carry a public-read RLS policy, and the publishable key below is
   // restricted to SELECT — safe to expose client-side.
   (function () {
@@ -1330,9 +1465,16 @@
     var SUPABASE_ANON_KEY = "sb_publishable_LIKG4Yp7PQ7oCHPzGepuBA_aBsHvsN8";
     var WHATSAPP_NUMBER = "447507822532";
 
-    var scroll = document.getElementById('activitiesScroll');
+    var rowsWrap = document.getElementById('activitiesRows');
     var wrap = document.getElementById('activities');
-    if (!scroll || !wrap) return;
+    var disclosure = document.getElementById('activitiesDisclosure');
+    var filterBar = document.getElementById('activitiesFilter');
+    var typeFilterBar = document.getElementById('activitiesTypeFilter');
+    if (!rowsWrap || !wrap) return;
+
+    // A shelf wider than this splits into two stacked scroll tracks so more of it is
+    // visible at once, instead of one row hiding most of a large bucket off-screen.
+    var TWO_TRACK_THRESHOLD = 6;
 
     // adult_price is stored in cents.
     function fmtPrice(cents) {
@@ -1352,6 +1494,25 @@
     function providerName(activity) {
       return (activity.providers && activity.providers.name) || activity.contact_name || null;
     }
+
+    // Which row/badge an activity belongs to. Anything routed through a named affiliate
+    // network gets its own row; everything else (WhatsApp enquiry, or an operator's own
+    // booking link) reads as "Direct". Add a row config below if a new network joins.
+    function providerKind(activity) {
+      var name = (providerName(activity) || '').toLowerCase();
+      if (name.indexOf('viator') !== -1) return 'viator';
+      if (name.indexOf('getyourguide') !== -1) return 'getyourguide';
+      return 'direct';
+    }
+
+    var PROVIDER_LABEL = { direct: 'Direct', viator: 'Viator', getyourguide: 'GetYourGuide' };
+
+    var ROWS = [
+      { key: 'trending', title: 'Trending Now', filter: function (a) { return a.is_trending; } },
+      { key: 'direct', title: 'Book Direct', tabLabel: 'Direct', sub: 'Straight to the operator, no middleman', filter: function (a) { return providerKind(a) === 'direct'; } },
+      { key: 'viator', title: 'Viator Partner Activities', tabLabel: 'Viator', filter: function (a) { return providerKind(a) === 'viator'; } },
+      { key: 'getyourguide', title: 'GetYourGuide Activities', tabLabel: 'GetYourGuide', filter: function (a) { return providerKind(a) === 'getyourguide'; } }
+    ];
 
     function whatsappLink(activity) {
       var provider = providerName(activity);
@@ -1373,17 +1534,20 @@
 
     function buildCard(activity) {
       var canBookDirect = !!(activity.external_booking && activity.url);
+      var kind = providerKind(activity);
 
       var a = document.createElement('a');
       a.className = 'activity-card';
       a.href = canBookDirect ? activity.url : whatsappLink(activity);
       a.target = '_blank';
       a.rel = canBookDirect ? 'noopener sponsored' : 'noopener';
+      a.setAttribute('data-category', activity.category || '');
       a.addEventListener('click', function () {
         if (window.trackEvent) {
           window.trackEvent('activity_click', activity.title, {
             type: canBookDirect ? 'book' : 'enquire',
-            category: activity.category || null
+            category: activity.category || null,
+            provider: kind
           });
         }
       });
@@ -1398,11 +1562,17 @@
         imgEl.decoding = 'async';
         imgEl.width = 400;
         imgEl.height = 300;
+        imgEl.draggable = false;
         imgEl.onerror = function () { imgEl.replaceWith(photoFallback(activity)); };
         a.appendChild(imgEl);
       } else {
         a.appendChild(photoFallback(activity));
       }
+
+      var play = document.createElement('div');
+      play.className = 'activity-play';
+      play.innerHTML = '<div class="activity-play-dot"><svg width="12" height="12" viewBox="0 0 24 24" fill="#0E1A17"><path d="M8 5v14l11-7z"/></svg></div>';
+      a.appendChild(play);
 
       if (activity.category) {
         var cat = document.createElement('span');
@@ -1428,6 +1598,11 @@
       var foot = document.createElement('div');
       foot.className = 'activity-foot';
 
+      var tag = document.createElement('span');
+      tag.className = 'provider-tag tag-' + kind;
+      tag.textContent = PROVIDER_LABEL[kind];
+      foot.appendChild(tag);
+
       var priceEl = document.createElement('div');
       priceEl.className = 'activity-price';
       var price = fmtPrice(activity.adult_price);
@@ -1441,12 +1616,6 @@
       }
       foot.appendChild(priceEl);
 
-      var book = document.createElement('div');
-      book.className = 'book-pill';
-      book.innerHTML = (canBookDirect ? 'Book' : 'Enquire') +
-        ' <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
-      foot.appendChild(book);
-
       body.appendChild(foot);
       a.appendChild(body);
       return a;
@@ -1459,15 +1628,136 @@
       return div;
     }
 
+    // Cards are <a> tags, so a mouse-drag to scroll the row can otherwise pick up the
+    // image (native browser drag) and register as a click on release, navigating away
+    // instead of scrolling. This makes click-drag actually scroll the row on desktop,
+    // and swallows the click that follows a drag so it doesn't open the card's link.
+    function enableDragScroll(container) {
+      var down = false, dragged = false, startX = 0, startScroll = 0;
+      container.addEventListener('pointerdown', function (e) {
+        if (e.pointerType && e.pointerType !== 'mouse') return;
+        down = true;
+        dragged = false;
+        startX = e.clientX;
+        startScroll = container.scrollLeft;
+      });
+      container.addEventListener('pointermove', function (e) {
+        if (!down) return;
+        var dx = e.clientX - startX;
+        if (!dragged && Math.abs(dx) > 6) {
+          dragged = true;
+          container.classList.add('dragging');
+        }
+        if (dragged) container.scrollLeft = startScroll - dx;
+      });
+      function release() {
+        down = false;
+        container.classList.remove('dragging');
+      }
+      container.addEventListener('pointerup', release);
+      container.addEventListener('pointerleave', release);
+      container.addEventListener('dragstart', function (e) { e.preventDefault(); });
+      container.addEventListener('click', function (e) {
+        if (dragged) { e.preventDefault(); e.stopPropagation(); }
+        dragged = false;
+      }, true);
+    }
+
+    function navArrow(direction) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'row-nav row-nav-' + direction;
+      btn.setAttribute('aria-label', direction === 'prev' ? 'Scroll left' : 'Scroll right');
+      var d = direction === 'prev' ? 'M15 6l-6 6 6 6' : 'M9 6l6 6-6 6';
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="' + d + '"/></svg>';
+      return btn;
+    }
+
+    function buildRow(config, items) {
+      var row = document.createElement('div');
+      row.className = 'activity-row';
+      row.setAttribute('data-row-key', config.key);
+
+      var head = document.createElement('div');
+      head.className = 'activity-row-head';
+      var h = document.createElement('span');
+      h.className = 'activity-row-title';
+      h.textContent = config.title;
+      head.appendChild(h);
+      if (config.sub) {
+        var s = document.createElement('span');
+        s.className = 'activity-row-sub';
+        s.textContent = config.sub;
+        head.appendChild(s);
+      }
+      row.appendChild(head);
+
+      // Split into two stacked tracks once a shelf has enough items that a single row
+      // would hide most of it off-screen — both tracks share one pair of nav arrows.
+      var chunks = [items];
+      if (items.length > TWO_TRACK_THRESHOLD) {
+        var mid = Math.ceil(items.length / 2);
+        chunks = [items.slice(0, mid), items.slice(mid)];
+      }
+
+      var viewport = document.createElement('div');
+      viewport.className = 'activity-row-viewport';
+
+      var tracks = document.createElement('div');
+      tracks.className = 'activity-row-tracks';
+      var scrolls = [];
+      chunks.forEach(function (chunk) {
+        var scroll = document.createElement('div');
+        scroll.className = 'activity-row-scroll';
+        chunk.forEach(function (activity) { scroll.appendChild(buildCard(activity)); });
+        enableDragScroll(scroll);
+        tracks.appendChild(scroll);
+        scrolls.push(scroll);
+      });
+
+      var prev = navArrow('prev');
+      var next = navArrow('next');
+      function scrollBy(dir) {
+        scrolls.forEach(function (scroll) {
+          scroll.scrollBy({ left: dir * scroll.clientWidth * 0.85, behavior: 'smooth' });
+        });
+      }
+      prev.addEventListener('click', function () { scrollBy(-1); });
+      next.addEventListener('click', function () { scrollBy(1); });
+
+      function updateNav() {
+        var ref = scrolls[0];
+        var atStart = ref.scrollLeft <= 1;
+        var atEnd = ref.scrollLeft + ref.clientWidth >= ref.scrollWidth - 1;
+        prev.disabled = atStart;
+        next.disabled = atEnd;
+      }
+      scrolls[0].addEventListener('scroll', updateNav);
+      window.addEventListener('resize', updateNav);
+      // Deferred: at this point the row hasn't been inserted into the page yet, so
+      // measuring now would see a detached, zero-width element and wrongly disable
+      // the arrows. By the next frame the caller has appended it and it has layout.
+      requestAnimationFrame(updateNav);
+
+      viewport.appendChild(prev);
+      viewport.appendChild(tracks);
+      viewport.appendChild(next);
+      row.appendChild(viewport);
+
+      return row;
+    }
+
     function showFallbackLink() {
-      wrap.querySelectorAll('.activity-card').forEach(function (el) { el.remove(); });
+      rowsWrap.innerHTML = '';
       var p = document.createElement('p');
       p.className = 'activities-fallback';
       p.innerHTML = 'Activities are loading slowly right now — message us on <a href="https://wa.me/' + WHATSAPP_NUMBER + '" target="_blank" rel="noopener">WhatsApp</a> and we\'ll help you book direct.';
-      scroll.replaceWith(p);
+      rowsWrap.appendChild(p);
     }
 
-    // Full list — every row in the table, newest/trending first.
+    // Full list — every row in the table, newest/trending first. Rows below are grouped
+    // client-side from this one fetch, so an activity can appear in Trending and in its
+    // provider's row at the same time — that's expected, same as any streaming watchlist.
     var params = new URLSearchParams({
       select: 'id,title,category,adult_price,url,external_booking,contact_phone,contact_name,badge_label,is_trending,posts(file,filetype,posterFile),providers(name,phone)',
       order: 'is_trending.desc,created_at.desc',
@@ -1487,10 +1777,88 @@
       .then(function (activities) {
         if (!activities.length) { showFallbackLink(); return; }
 
-        scroll.innerHTML = '';
-        activities.forEach(function (activity) {
-          scroll.appendChild(buildCard(activity));
+        rowsWrap.innerHTML = '';
+
+        var filterableKeys = []; // rows worth their own filter tab (everything but Trending)
+        ROWS.forEach(function (config) {
+          var items = activities.filter(config.filter);
+          if (!items.length) return;
+          rowsWrap.appendChild(buildRow(config, items));
+          if (config.key !== 'trending') filterableKeys.push({ key: config.key, label: config.tabLabel || config.title });
         });
+
+        // Most "Direct" bookings still run through an affiliate-tagged link (Andeor etc.),
+        // not just the Viator/GetYourGuide rows — so this covers any externally-booked
+        // activity, not only the named-network ones.
+        var anyAffiliateBooking = activities.some(function (a) { return a.external_booking && a.url; });
+        if (disclosure && anyAffiliateBooking) disclosure.style.display = 'block';
+
+        // Provider (row-level) and activity type (card-level) are two independent filters
+        // that combine: provider picks which shelves show, type hides non-matching cards
+        // within whatever shelves are left, and a shelf left with zero visible cards hides too.
+        var currentProvider = 'all';
+        var currentType = 'all';
+
+        function applyFilters() {
+          rowsWrap.querySelectorAll('.activity-row').forEach(function (row) {
+            var rowKey = row.getAttribute('data-row-key');
+            if (currentProvider !== 'all' && rowKey !== currentProvider) {
+              row.style.display = 'none';
+              return;
+            }
+            var visibleCards = 0;
+            row.querySelectorAll('.activity-card').forEach(function (card) {
+              var match = currentType === 'all' || card.getAttribute('data-category') === currentType;
+              card.style.display = match ? '' : 'none';
+              if (match) visibleCards++;
+            });
+            row.style.display = visibleCards ? '' : 'none';
+          });
+        }
+
+        function buildFilterBar(bar, options, current, onPick) {
+          if (!bar || options.length < 2) return;
+          bar.innerHTML = '';
+          bar.style.display = 'flex';
+          options.forEach(function (opt) {
+            var tab = document.createElement('button');
+            tab.type = 'button';
+            tab.className = 'filter-tab' + (opt.key === current ? ' active' : '');
+            tab.setAttribute('data-filter', opt.key);
+            tab.textContent = opt.label;
+            tab.addEventListener('click', function () {
+              onPick(opt.key);
+              bar.querySelectorAll('.filter-tab').forEach(function (t) {
+                t.classList.toggle('active', t === tab);
+              });
+            });
+            bar.appendChild(tab);
+          });
+        }
+
+        buildFilterBar(
+          filterBar,
+          [{ key: 'all', label: 'All' }].concat(filterableKeys),
+          currentProvider,
+          function (key) { currentProvider = key; applyFilters(); }
+        );
+
+        var typeOptions = [];
+        var seenTypes = {};
+        activities.forEach(function (a) {
+          if (a.category && !seenTypes[a.category]) {
+            seenTypes[a.category] = true;
+            typeOptions.push({ key: a.category, label: a.category });
+          }
+        });
+        typeOptions.sort(function (x, y) { return x.label.localeCompare(y.label); });
+
+        buildFilterBar(
+          typeFilterBar,
+          [{ key: 'all', label: 'All Types' }].concat(typeOptions),
+          currentType,
+          function (key) { currentType = key; applyFilters(); }
+        );
       })
       .catch(function () {
         showFallbackLink();
