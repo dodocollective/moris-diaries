@@ -1787,6 +1787,14 @@
           if (config.key !== 'trending') filterableKeys.push({ key: config.key, label: config.tabLabel || config.title });
         });
 
+        // Tab order is independent of shelf order on the page — GetYourGuide always
+        // leads the provider tabs, whatever order its row happens to render in.
+        filterableKeys.sort(function (a, b) {
+          if (a.key === 'getyourguide') return -1;
+          if (b.key === 'getyourguide') return 1;
+          return 0;
+        });
+
         // Most "Direct" bookings still run through an affiliate-tagged link (Andeor etc.),
         // not just the Viator/GetYourGuide rows — so this covers any externally-booked
         // activity, not only the named-network ones.
