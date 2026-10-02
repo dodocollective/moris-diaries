@@ -1355,6 +1355,8 @@
 
     <!-- GetYourGuide region explorer — self-hides if there are no GetYourGuide activities -->
     <div id="gygExplorer" style="display:none;">
+      <div id="gygTrending"></div>
+
       <div class="collections" id="gygCollections"></div>
 
       <div class="explorer">
@@ -1921,6 +1923,13 @@
       if (moreWaysHead && gygActivities.length) moreWaysHead.style.display = 'block';
       if (!gygActivities.length) return;
       gygExplorer.style.display = 'block';
+
+      var gygTrendingWrap = document.getElementById('gygTrending');
+      var trendingItems = gygActivities.filter(function (a) { return a.is_trending; });
+      if (gygTrendingWrap && trendingItems.length) {
+        gygTrendingWrap.innerHTML = '';
+        gygTrendingWrap.appendChild(buildRow({ key: 'gyg-trending', title: 'Trending Now' }, trendingItems));
+      }
 
       var currentCollection = 'all';
       var currentRegion = null;
