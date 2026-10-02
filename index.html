@@ -867,6 +867,86 @@
   }
   .activities-fallback a { color: var(--lagoon); }
 
+  /* ================= GETYOURGUIDE REGION EXPLORER ================= */
+
+  .collections {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 20px; flex-wrap: wrap; margin-bottom: 28px;
+  }
+  .collections-row { display: flex; gap: 14px; flex-wrap: wrap; }
+  .collection-tile {
+    width: 172px; height: 122px; border-radius: 7px; position: relative; overflow: hidden;
+    border: 1px solid rgba(245,240,230,0.1); flex: 0 0 auto; cursor: pointer;
+    transition: border-color 0.15s ease, transform 0.15s ease;
+  }
+  .collection-tile:hover, .collection-tile:focus-visible { transform: translateY(-2px); outline: none; }
+  .collection-tile.lead { width: 204px; }
+  .collection-tile.active { border-color: var(--clay); box-shadow: 0 16px 32px -14px rgba(201,98,45,0.35); }
+  .collection-tile .bg { position: absolute; inset: 0; }
+  .collection-tile .fade { position: absolute; inset: 0; background: linear-gradient(0deg, rgba(14,26,23,0.92) 25%, rgba(14,26,23,0.15) 80%); }
+  .collection-tile .label { position: absolute; left: 13px; right: 13px; bottom: 11px; }
+  .collection-tile .label .name { font-family: 'Fraunces', serif; font-weight: 500; font-size: 14px; margin-bottom: 3px; }
+  .collection-tile .label .meta { font-size: 10px; color: var(--sand-dim); }
+
+  .direct-link {
+    display: inline-block; font-size: 11.5px; color: var(--stone); white-space: nowrap;
+    padding-bottom: 8px; border-bottom: 1px solid rgba(245,240,230,0.1); margin-bottom: 36px;
+  }
+
+  .explorer { display: grid; grid-template-columns: 1fr; gap: 24px; margin-bottom: 16px; }
+
+  .map-card {
+    background: rgba(245,240,230,0.03); border: 1px solid rgba(245,240,230,0.1);
+    border-radius: 10px; padding: 22px;
+  }
+  .map-card .map-sub { font-size: 11px; color: var(--stone); margin: 4px 0 14px; }
+
+  .island-map { display: none; width: 100%; }
+
+  .pin circle.dot { fill: var(--clay); cursor: pointer; }
+  .pin circle.pulse { fill: var(--clay); animation: pin-pulse 2.4s ease-out infinite; pointer-events: none; }
+  .pin text { fill: var(--sand-dim); font-family: 'Inter', sans-serif; font-size: 12px; cursor: pointer; user-select: none; }
+  .pin.active circle.dot { fill: var(--sand); stroke: var(--clay); stroke-width: 2.5; r: 9; }
+  .pin.active text { fill: var(--sand); font-weight: 600; }
+  .pin:focus-visible circle.dot { outline: 2px solid var(--clay); outline-offset: 3px; }
+  @keyframes pin-pulse { 0%, 100% { transform: scale(1); opacity: 0.55; } 50% { transform: scale(1.8); opacity: 0; } }
+
+  .chip-row { display: flex; gap: 9px; overflow-x: auto; padding-bottom: 4px; }
+  .region-chip {
+    flex: 0 0 auto; display: flex; align-items: center; gap: 7px;
+    padding: 9px 15px; border-radius: 22px; border: 1px solid rgba(245,240,230,0.22);
+    font-size: 11.5px; color: var(--sand-dim); cursor: pointer; background: transparent;
+    font-family: 'Inter', sans-serif;
+  }
+  .region-chip .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--clay); }
+  .region-chip.active { background: var(--clay); color: var(--ink); border-color: var(--clay); font-weight: 700; }
+  .region-chip.active .dot { background: var(--ink); }
+  .region-chip:focus-visible { outline: 2px solid var(--clay); outline-offset: 2px; }
+
+  .map-legend { display: flex; align-items: center; gap: 8px; font-size: 10.5px; color: var(--stone); margin-top: 14px; }
+  .map-legend .legend-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--clay); }
+
+  .feed-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+  .feed-head .region-name { font-family: 'Fraunces', serif; font-weight: 500; font-size: 18px; }
+  .feed-head .region-sub { font-size: 11.5px; color: var(--stone); }
+
+  .feed-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+  .feed-grid .activity-card { width: 100%; }
+
+  @media (min-width: 640px) {
+    .feed-grid { grid-template-columns: repeat(3, minmax(0,1fr)); }
+  }
+
+  @media (min-width: 900px) {
+    .explorer { grid-template-columns: 420px 1fr; }
+    .island-map { display: block; }
+    .chip-row { display: none; }
+  }
+
+  @media (min-width: 1024px) {
+    .feed-grid { grid-template-columns: repeat(3, minmax(0,1fr)); gap: 18px; }
+  }
+
   /* form */
   .itin-form {
     background: rgba(245,240,230,0.04);
@@ -1271,22 +1351,55 @@
   <div class="activities-wrap" id="activities">
     <div class="module-eyebrow">✦ Excursions &amp; Activities</div>
     <h2 class="module-h2">Book an Activity</h2>
-    <p class="module-sub">The full list, live from the app — browse it like a watchlist, booked direct or through our tour partners.</p>
+    <p class="module-sub">Curated with GetYourGuide, or explore the island to find it — every activity is pinned to where it actually happens.</p>
 
-    <div class="activities-filter" id="activitiesFilter" role="tablist" style="display:none;"></div>
-    <div class="activities-filter activities-filter-type" id="activitiesTypeFilter" role="tablist" style="display:none;"></div>
+    <!-- GetYourGuide region explorer — self-hides if there are no GetYourGuide activities -->
+    <div id="gygExplorer" style="display:none;">
+      <div class="collections" id="gygCollections"></div>
 
-    <div id="activitiesRows" aria-live="polite">
-      <div class="activity-row">
-        <div class="activity-row-head"><span class="activity-row-title">Loading activities…</span></div>
-        <div class="activity-row-scroll">
-          <div class="activity-card skeleton"><div class="activity-photo-fallback">Loading…</div><div class="activity-body"><div class="activity-title">Loading activity</div><div class="activity-meta">Loading</div><div class="activity-foot"><div class="activity-price">from €0.00</div></div></div></div>
-          <div class="activity-card skeleton"><div class="activity-photo-fallback">Loading…</div><div class="activity-body"><div class="activity-title">Loading activity</div><div class="activity-meta">Loading</div><div class="activity-foot"><div class="activity-price">from €0.00</div></div></div></div>
-          <div class="activity-card skeleton"><div class="activity-photo-fallback">Loading…</div><div class="activity-body"><div class="activity-title">Loading activity</div><div class="activity-meta">Loading</div><div class="activity-foot"><div class="activity-price">from €0.00</div></div></div></div>
-          <div class="activity-card skeleton"><div class="activity-photo-fallback">Loading…</div><div class="activity-body"><div class="activity-title">Loading activity</div><div class="activity-meta">Loading</div><div class="activity-foot"><div class="activity-price">from €0.00</div></div></div></div>
+      <div class="explorer">
+        <div class="map-card">
+          <span class="eyebrow">Explore By Region</span>
+          <div class="map-sub">Every pin is a real place from the app — pick one to filter.</div>
+          <svg class="island-map" id="islandMap" viewBox="0 0 400 500">
+            <path d="M200,30 C260,20 320,60 340,120 C360,180 350,230 380,280 C400,330 370,380 330,410 C290,450 240,470 190,460 C140,450 100,420 80,370 C60,320 70,270 50,220 C30,170 50,110 90,80 C130,50 160,40 200,30 Z"
+              fill="rgba(61,122,107,0.08)" stroke="rgba(245,240,230,0.18)" stroke-width="1.5"/>
+          </svg>
+          <div class="chip-row" id="regionChips"></div>
+          <div class="map-legend"><span class="legend-dot"></span> GetYourGuide</div>
+        </div>
+
+        <div>
+          <div class="feed-head">
+            <span class="region-name" id="regionName"></span><span class="region-sub" id="regionSub"></span>
+          </div>
+          <div class="feed-grid" id="gygFeed"></div>
+        </div>
+      </div>
+
+      <a href="#more-ways-to-book" class="direct-link">Prefer Direct or Viator? →</a>
+    </div>
+
+    <!-- Direct / Viator — demoted below the GetYourGuide explorer, same row system as before -->
+    <div id="more-ways-to-book">
+      <div class="eyebrow" id="moreWaysHead" style="display:none; text-align:center; margin:52px 0 20px;">More Ways To Book</div>
+
+      <div class="activities-filter" id="activitiesFilter" role="tablist" style="display:none;"></div>
+      <div class="activities-filter activities-filter-type" id="activitiesTypeFilter" role="tablist" style="display:none;"></div>
+
+      <div id="activitiesRows" aria-live="polite">
+        <div class="activity-row">
+          <div class="activity-row-head"><span class="activity-row-title">Loading activities…</span></div>
+          <div class="activity-row-scroll">
+            <div class="activity-card skeleton"><div class="activity-photo-fallback">Loading…</div><div class="activity-body"><div class="activity-title">Loading activity</div><div class="activity-meta">Loading</div><div class="activity-foot"><div class="activity-price">from €0.00</div></div></div></div>
+            <div class="activity-card skeleton"><div class="activity-photo-fallback">Loading…</div><div class="activity-body"><div class="activity-title">Loading activity</div><div class="activity-meta">Loading</div><div class="activity-foot"><div class="activity-price">from €0.00</div></div></div></div>
+            <div class="activity-card skeleton"><div class="activity-photo-fallback">Loading…</div><div class="activity-body"><div class="activity-title">Loading activity</div><div class="activity-meta">Loading</div><div class="activity-foot"><div class="activity-price">from €0.00</div></div></div></div>
+            <div class="activity-card skeleton"><div class="activity-photo-fallback">Loading…</div><div class="activity-body"><div class="activity-title">Loading activity</div><div class="activity-meta">Loading</div><div class="activity-foot"><div class="activity-price">from €0.00</div></div></div></div>
+          </div>
         </div>
       </div>
     </div>
+
     <p class="activities-disclosure" id="activitiesDisclosure" style="display:none;">Some activities on this page are booked through travel affiliates — we may earn a small commission on qualifying bookings, at no extra cost to you.</p>
   </div>
 
@@ -1453,13 +1566,13 @@
 </script>
 
 <script>
-  // Excursions & Activities — pulled live from Supabase `activities` (the app's real, full
-  // catalogue, joined with `posts` for a photo and `providers` for the operator's contact info),
-  // then grouped client-side into Netflix-style rows by provider. A row only renders once it has
-  // at least one matching activity, so the GetYourGuide row appears on its own the moment
-  // GetYourGuide rows exist in the table — no separate launch flag to flip.
-  // All three tables carry a public-read RLS policy, and the publishable key below is
-  // restricted to SELECT — safe to expose client-side.
+  // Excursions & Activities — pulled live from Supabase `activities`, joined with `posts`
+  // (photo + its point of interest) and `providers` (operator contact info). GetYourGuide
+  // gets its own region explorer below (grouped by each activity's real point of interest);
+  // everything else groups client-side into Netflix-style rows by provider. Both self-hide
+  // with no matching data, so a new provider or region appears on its own, no flag to flip.
+  // All tables carry a public-read RLS policy, and the publishable key below is restricted
+  // to SELECT — safe to expose client-side.
   (function () {
     var SUPABASE_URL = "https://uyavmmgignbwbfhzwyjl.supabase.co";
     var SUPABASE_ANON_KEY = "sb_publishable_LIKG4Yp7PQ7oCHPzGepuBA_aBsHvsN8";
@@ -1507,11 +1620,11 @@
 
     var PROVIDER_LABEL = { direct: 'Direct', viator: 'Viator', getyourguide: 'GetYourGuide' };
 
+    // GetYourGuide activities get their own region explorer (below) rather than a row here.
     var ROWS = [
-      { key: 'trending', title: 'Trending Now', filter: function (a) { return a.is_trending; } },
+      { key: 'trending', title: 'Trending Now', filter: function (a) { return a.is_trending && providerKind(a) !== 'getyourguide'; } },
       { key: 'direct', title: 'Book Direct', tabLabel: 'Direct', sub: 'Straight to the operator, no middleman', filter: function (a) { return providerKind(a) === 'direct'; } },
-      { key: 'viator', title: 'Viator Partner Activities', tabLabel: 'Viator', filter: function (a) { return providerKind(a) === 'viator'; } },
-      { key: 'getyourguide', title: 'GetYourGuide Activities', tabLabel: 'GetYourGuide', filter: function (a) { return providerKind(a) === 'getyourguide'; } }
+      { key: 'viator', title: 'Viator Partner Activities', tabLabel: 'Viator', filter: function (a) { return providerKind(a) === 'viator'; } }
     ];
 
     function whatsappLink(activity) {
@@ -1755,11 +1868,181 @@
       rowsWrap.appendChild(p);
     }
 
+    // GetYourGuide activities get their own region explorer rather than a row: a
+    // collection-tile switcher (type) crossed with an island map (where), built from
+    // each activity's real point of interest instead of a generic category tab.
+    var REGION_CLUSTERS = [
+      { id: 'chamouny', name: 'Chamouny', sub: 'Valle Adventure Park & around', x: 140, y: 310, pois: ['Chamouny'] },
+      { id: 'tamarin', name: 'Tamarin', sub: 'West coast', x: 75, y: 270, pois: ['Tamarin Public Beach'] },
+      { id: 'grandbaie', name: 'Grand Baie & North', sub: 'Grand Baie · Calodyne · Pamplemousses', x: 225, y: 75, pois: ['Grand Baie Beach', 'Calodyne', "L'Aventure du Sucre Museum"] },
+      { id: 'bellemare', name: 'Belle Mare & East', sub: "Belle Mare · Trou d'Eau Douce · Grand River SE", x: 335, y: 230, pois: ['Belle Mare Beach', "Trou d'Eau Douce", 'Grand River South East'] },
+      { id: 'mahebourg', name: 'Mahébourg & South East', sub: 'Mahébourg · Blue Bay · Île aux Cerfs', x: 300, y: 380, pois: ['Mahebourg', 'Blue Bay Beach', 'Ile aux Cerfs'] },
+      { id: 'belombre', name: 'Bel Ombre & South', sub: 'Bel Ombre · Rivière des Anguilles', x: 175, y: 430, pois: ['Bel Ombre Nature Reserve', 'C Beach Club', 'Union Ducray, Rivière des Anguilles', 'Tamarind Falls'] },
+      { id: 'lemorne', name: 'Le Morne & West', sub: 'Le Morne · Amber Island · Pointe aux Sables', x: 70, y: 340, pois: ['Le Morne Brabant', 'Amber Island', 'World of Seashells Museum'] }
+    ];
+
+    var COLLECTIONS = [
+      { id: 'all', label: 'GetYourGuide Picks', filter: function () { return true; } },
+      { id: 'adventure', label: 'Adventure', sub: 'Zipline · Quad · Hikes', filter: function (a) { return a.category === 'Outdoor' || a.category === 'Air'; } },
+      { id: 'island-hopping', label: 'Island Hopping', sub: 'Boats · Catamarans', filter: function (a) { return a.category === 'Water'; } },
+      { id: 'slow-days', label: 'Slow Days', sub: 'Beach clubs · Museums', filter: function (a) { return a.category === 'Food' || a.category === 'Culture'; } }
+    ];
+
+    function poiName(activity) {
+      return activity.posts && activity.posts.points_of_interest && activity.posts.points_of_interest.name;
+    }
+
+    function regionFor(activity) {
+      var name = poiName(activity);
+      for (var i = 0; i < REGION_CLUSTERS.length; i++) {
+        if (REGION_CLUSTERS[i].pois.indexOf(name) !== -1) return REGION_CLUSTERS[i];
+      }
+      return null;
+    }
+
+    function svgEl(tag, attrs) {
+      var e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+      for (var k in attrs) e.setAttribute(k, attrs[k]);
+      return e;
+    }
+
+    function buildGygExplorer(activities) {
+      var gygExplorer = document.getElementById('gygExplorer');
+      var gygCollections = document.getElementById('gygCollections');
+      var islandMap = document.getElementById('islandMap');
+      var regionChips = document.getElementById('regionChips');
+      var regionNameEl = document.getElementById('regionName');
+      var regionSubEl = document.getElementById('regionSub');
+      var gygFeed = document.getElementById('gygFeed');
+      var moreWaysHead = document.getElementById('moreWaysHead');
+      if (!gygExplorer || !islandMap) return;
+
+      var gygActivities = activities.filter(function (a) { return providerKind(a) === 'getyourguide'; });
+      if (moreWaysHead && gygActivities.length) moreWaysHead.style.display = 'block';
+      if (!gygActivities.length) return;
+      gygExplorer.style.display = 'block';
+
+      var currentCollection = 'all';
+      var currentRegion = null;
+
+      function collectionItems(collectionId) {
+        var collection = COLLECTIONS.filter(function (c) { return c.id === collectionId; })[0];
+        return gygActivities.filter(collection.filter);
+      }
+
+      function renderCollections() {
+        gygCollections.innerHTML = '';
+        var row = document.createElement('div');
+        row.className = 'collections-row';
+        COLLECTIONS.forEach(function (collection) {
+          var items = collectionItems(collection.id);
+          if (!items.length) return;
+          var tile = document.createElement('div');
+          tile.className = 'collection-tile' +
+            (collection.id === 'all' ? ' lead' : '') +
+            (collection.id === currentCollection ? ' active' : '');
+          tile.setAttribute('tabindex', '0');
+          tile.setAttribute('role', 'button');
+          tile.setAttribute('aria-label', collection.label);
+          tile.innerHTML =
+            '<div class="bg" style="background:radial-gradient(ellipse at 30% 20%, rgba(201,98,45,0.4), transparent 60%), linear-gradient(160deg,#1c1812,#0e1a17);"></div>' +
+            '<div class="fade"></div>' +
+            '<div class="label"><div class="name">' + collection.label + '</div><div class="meta">' +
+            (collection.id === 'all' ? items.length + ' experiences' : collection.sub) + '</div></div>';
+          tile.addEventListener('click', function () { selectCollection(collection.id); });
+          tile.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectCollection(collection.id); }
+          });
+          row.appendChild(tile);
+        });
+        gygCollections.appendChild(row);
+      }
+
+      function renderMap() {
+        islandMap.querySelectorAll('.pin').forEach(function (p) { p.remove(); });
+        regionChips.innerHTML = '';
+
+        var items = collectionItems(currentCollection);
+        var counts = {};
+        items.forEach(function (a) {
+          var region = regionFor(a);
+          if (region) counts[region.id] = (counts[region.id] || 0) + 1;
+        });
+
+        var activeClusters = REGION_CLUSTERS.filter(function (r) { return counts[r.id]; });
+        if (!activeClusters.length) { currentRegion = null; return; }
+        if (!currentRegion || !counts[currentRegion]) {
+          currentRegion = activeClusters.reduce(function (best, r) {
+            return counts[r.id] > counts[best.id] ? r : best;
+          }, activeClusters[0]).id;
+        }
+
+        activeClusters.forEach(function (region) {
+          var g = svgEl('g', {
+            class: 'pin' + (region.id === currentRegion ? ' active' : ''),
+            tabindex: '0', role: 'button', 'aria-label': region.name
+          });
+          g.appendChild(svgEl('circle', { class: 'pulse', cx: region.x, cy: region.y, r: 6 }));
+          g.appendChild(svgEl('circle', { class: 'dot', cx: region.x, cy: region.y, r: 6 }));
+          var label = svgEl('text', { x: region.x + 12, y: region.y - 8 });
+          label.textContent = region.name + ' · ' + counts[region.id];
+          g.appendChild(label);
+          g.addEventListener('click', function () { selectRegion(region.id); });
+          g.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectRegion(region.id); }
+          });
+          islandMap.appendChild(g);
+
+          var chip = document.createElement('button');
+          chip.type = 'button';
+          chip.className = 'region-chip' + (region.id === currentRegion ? ' active' : '');
+          chip.innerHTML = '<span class="dot"></span>' + region.name + ' · ' + counts[region.id];
+          chip.addEventListener('click', function () { selectRegion(region.id); });
+          regionChips.appendChild(chip);
+        });
+      }
+
+      function renderFeed() {
+        var region = REGION_CLUSTERS.filter(function (r) { return r.id === currentRegion; })[0];
+        gygFeed.innerHTML = '';
+        if (!region) {
+          regionNameEl.textContent = 'No activities in this collection yet';
+          regionSubEl.textContent = '';
+          return;
+        }
+        regionNameEl.textContent = region.name;
+        regionSubEl.textContent = region.sub;
+        var items = collectionItems(currentCollection).filter(function (a) {
+          var r = regionFor(a);
+          return r && r.id === currentRegion;
+        });
+        items.forEach(function (a) { gygFeed.appendChild(buildCard(a)); });
+      }
+
+      function selectCollection(id) {
+        currentCollection = id;
+        currentRegion = null; // recompute the default region for the new collection
+        renderCollections();
+        renderMap();
+        renderFeed();
+      }
+
+      function selectRegion(id) {
+        currentRegion = id;
+        renderMap();
+        renderFeed();
+      }
+
+      renderCollections();
+      renderMap();
+      renderFeed();
+    }
+
     // Full list — every row in the table, newest/trending first. Rows below are grouped
     // client-side from this one fetch, so an activity can appear in Trending and in its
     // provider's row at the same time — that's expected, same as any streaming watchlist.
     var params = new URLSearchParams({
-      select: 'id,title,category,adult_price,url,external_booking,contact_phone,contact_name,badge_label,is_trending,posts(file,filetype,posterFile),providers(name,phone)',
+      select: 'id,title,category,adult_price,url,external_booking,contact_phone,contact_name,badge_label,is_trending,posts(file,filetype,posterFile,points_of_interest(name)),providers(name,phone)',
       order: 'is_trending.desc,created_at.desc',
       limit: '200'
     });
@@ -1785,14 +2068,6 @@
           if (!items.length) return;
           rowsWrap.appendChild(buildRow(config, items));
           if (config.key !== 'trending') filterableKeys.push({ key: config.key, label: config.tabLabel || config.title });
-        });
-
-        // Tab order is independent of shelf order on the page — GetYourGuide always
-        // leads the provider tabs, whatever order its row happens to render in.
-        filterableKeys.sort(function (a, b) {
-          if (a.key === 'getyourguide') return -1;
-          if (b.key === 'getyourguide') return 1;
-          return 0;
         });
 
         // Most "Direct" bookings still run through an affiliate-tagged link (Andeor etc.),
@@ -1851,10 +2126,12 @@
           function (key) { currentProvider = key; applyFilters(); }
         );
 
+        // GetYourGuide lives in its own explorer below, not these rows, so its categories
+        // shouldn't offer a type tab here that would filter this section down to nothing.
         var typeOptions = [];
         var seenTypes = {};
         activities.forEach(function (a) {
-          if (a.category && !seenTypes[a.category]) {
+          if (a.category && !seenTypes[a.category] && providerKind(a) !== 'getyourguide') {
             seenTypes[a.category] = true;
             typeOptions.push({ key: a.category, label: a.category });
           }
@@ -1867,6 +2144,8 @@
           currentType,
           function (key) { currentType = key; applyFilters(); }
         );
+
+        buildGygExplorer(activities);
       })
       .catch(function () {
         showFallbackLink();
