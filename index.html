@@ -1275,9 +1275,9 @@
     </div>
   </div>
 
-  <div class="partner-banner">
+  <a href="https://www.hertz.mu/" target="_blank" rel="noopener sponsored" class="partner-banner" id="partner-banner-hertz">
     <img src="assets/hertz-partner-banner.jpg" alt="Moris Diaries x Hertz Mauritius — 15% off your car hire with code MORISD" width="1536" height="1024" loading="lazy">
-  </div>
+  </a>
 
   <div class="section-divider">
     <svg viewBox="0 0 400 24" preserveAspectRatio="none">
@@ -1554,9 +1554,11 @@
     }
 
     var androidCard = document.getElementById('android-link');
+    var hertzBanner = document.getElementById('partner-banner-hertz');
     if (window.trackEvent) {
       if (iosCard) iosCard.addEventListener('click', function () { window.trackEvent('download_click', 'ios'); });
       if (androidCard) androidCard.addEventListener('click', function () { window.trackEvent('download_click', 'android'); });
+      if (hertzBanner) hertzBanner.addEventListener('click', function () { window.trackEvent('partner_banner_click', 'hertz'); });
     }
   })();
 </script>
