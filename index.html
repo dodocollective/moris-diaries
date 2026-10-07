@@ -1558,7 +1558,7 @@
     if (window.trackEvent) {
       if (iosCard) iosCard.addEventListener('click', function () { window.trackEvent('download_click', 'ios'); });
       if (androidCard) androidCard.addEventListener('click', function () { window.trackEvent('download_click', 'android'); });
-      if (hertzBanner) hertzBanner.addEventListener('click', function () { window.trackEvent('partner_banner_click', 'hertz'); });
+      if (hertzBanner) hertzBanner.addEventListener('click', function () { window.trackEvent('partner_banner_click', 'Hertz', { partner: 'Hertz' }); });
     }
   })();
 </script>
