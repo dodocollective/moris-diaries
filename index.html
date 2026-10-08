@@ -1304,7 +1304,7 @@
               Request this route
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
             </a>
-            <a href="https://dodocollective.s3.us-east-1.amazonaws.com/moris-diaries-first-timers-route.pdf" class="minute-cta secondary" target="_blank" rel="noopener">
+            <a href="https://dodocollective.s3.us-east-1.amazonaws.com/moris-diaries-first-timers-route.pdf" class="minute-cta secondary" target="_blank" rel="noopener" data-download="First-Timer's Route">
               Download PDF
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v13M6 12l6 6 6-6"/></svg>
             </a>
@@ -1323,7 +1323,7 @@
               Request this route
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
             </a>
-            <a href="https://dodocollective.s3.us-east-1.amazonaws.com/moris-diaries-honeymoon-route.pdf" class="minute-cta secondary" target="_blank" rel="noopener">
+            <a href="https://dodocollective.s3.us-east-1.amazonaws.com/moris-diaries-honeymoon-route.pdf" class="minute-cta secondary" target="_blank" rel="noopener" data-download="Honeymoon Route">
               Download PDF
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v13M6 12l6 6 6-6"/></svg>
             </a>
@@ -1338,7 +1338,7 @@
           <div class="card-title">The Ultimate Itinerary Guidebook</div>
           <div class="card-desc">The whole island in one download — plan your trip at a glance, no WhatsApp required.</div>
           <div class="card-links">
-            <a href="https://dodocollective.s3.us-east-1.amazonaws.com/Mauritius-Ultimate-Itinerary-Guidebook.pdf" class="minute-cta" target="_blank" rel="noopener">
+            <a href="https://dodocollective.s3.us-east-1.amazonaws.com/Mauritius-Ultimate-Itinerary-Guidebook.pdf" class="minute-cta" target="_blank" rel="noopener" data-download="Ultimate Guidebook">
               Download Guidebook
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v13M6 12l6 6 6-6"/></svg>
             </a>
@@ -1562,6 +1562,13 @@
     });
   }
   bindRouteClicks();
+
+  // PDF download links (route guides + the Ultimate Guidebook).
+  document.querySelectorAll('[data-download]').forEach(function (el) {
+    el.addEventListener('click', function () {
+      if (window.trackEvent) window.trackEvent('itinerary_download', el.getAttribute('data-download'));
+    });
+  });
 
   var tripForm = document.getElementById('tripForm');
   if (tripForm) {
