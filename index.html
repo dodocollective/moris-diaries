@@ -78,6 +78,75 @@
   font-style: normal;
   font-display: swap;
 }
+  /* ================= TOP: BANNER, TRIP FORM, APP, GUIDES, HERTZ =================
+     Mobile stacks banner(+brand) → quick links → form → app → guides → Hertz;
+     desktop overlays the brand on the banner and splits form | app + guides. */
+  .page-wrap { padding-top: 22px; }
+  .top { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; margin-bottom: 40px; }
+  .top > * { min-width: 0; grid-column: 1; }
+  .brand-row { grid-row: 1; align-self: end; position: relative; z-index: 2; padding: 0 0 16px; display: flex; align-items: center; gap: 14px; }
+  .brand-row .stamp { margin: 0; width: 56px; height: 56px; flex: 0 0 auto; }
+  .brand-row .stamp img { width: 56px; height: 56px; }
+  .brand-row h1 { font-size: 30px; text-align: left; margin: 0; line-height: 1; }
+  .brand-row .tagline { text-align: left; margin: 4px 0 0; font-size: 12.5px; }
+  .top-grid { grid-row: 3; display: flex; flex-direction: column; gap: 14px; }
+  .top-side { display: flex; flex-direction: column; gap: 14px; }
+  .top-form .itin-form { margin: 0; width: 100%; max-width: none; }
+  .top #trip-concierge { margin: 0; }
+  .top #trip-concierge .module-eyebrow { justify-content: flex-start; font-size: 16px; margin: 10px 0 4px; }
+  .top #trip-concierge .module-h2 { text-align: left; font-size: 22px; margin-bottom: 4px; }
+  .top #trip-concierge .module-sub { text-align: left; margin: 0 0 12px; max-width: none; font-size: 12.5px; }
+  .top #trip-concierge > svg { display: none; }
+  .top .routes { display: flex; flex-direction: column; gap: 10px; }
+  .jump-chips { grid-row: 2; }
+  .banner-hero { grid-row: 1; width: calc(100% + 40px); margin: -22px 0 0 -20px; overflow: hidden; }
+  .banner-hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(14,26,23,0.9) 0%, rgba(14,26,23,0.25) 55%, rgba(14,26,23,0) 100%); }
+  .brand-row .tagline em { color: #9FD3C4; }
+  .brand-row h1 { text-shadow: 0 2px 14px rgba(0,0,0,0.5); }
+  .banner-hero { position: relative; }
+  .banner-hero img { display: block; width: 100%; height: 200px; object-fit: cover; object-position: 35% 60%; }
+  .top-hertz .partner-banner { margin: 0; }
+
+  .qs-card { background: rgba(245,240,230,0.04); border: 1px solid rgba(245,240,230,0.12); border-radius: 6px; padding: 18px; }
+  .qs-eyebrow { font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--clay); }
+  .qs-title { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 500; margin: 4px 0 6px; color: var(--sand); }
+  .qs-app .cards { margin: 12px 0 0; width: 100%; max-width: none; gap: 10px; }
+  .qs-app .browser-notice { margin-top: 10px; }
+
+  .jump-chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; }
+  .jump-chips a { white-space: nowrap; padding: 8px 13px; border: 1px solid rgba(245,240,230,0.18); border-radius: 20px; font-size: 12px; font-weight: 600; color: var(--sand-dim); text-decoration: none; }
+  .jump-chips a:hover { border-color: var(--clay); color: var(--clay); }
+
+  #trip-concierge .itin-form { margin: 36px auto 0; }
+  .stay-wrap { margin-top: 0; }
+
+  @media (min-width: 960px) {
+    .page-wrap { padding-top: 0; }
+    .topbar nav { align-items: center; }
+    .topbar nav a.nav-wa { color: var(--ink); background: var(--lagoon); color: var(--sand); padding: 9px 16px; border-radius: 4px; }
+    .top { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; padding-top: 28px; margin-bottom: 72px; }
+    .banner-hero { grid-column: 1 / -1; grid-row: 1; width: 100%; margin: 0; border-radius: 6px; }
+    .banner-hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(14,26,23,0.82) 0%, rgba(14,26,23,0.35) 42%, rgba(14,26,23,0) 70%); }
+    .banner-hero img { height: 340px; object-position: 50% 62%; }
+    .brand-row { grid-column: 1 / -1; grid-row: 1; align-self: end; position: relative; z-index: 2; padding: 0 0 34px 40px; gap: 20px; }
+    .brand-row .stamp, .brand-row .stamp img { width: 76px; height: 76px; }
+    .brand-row h1 { font-size: 54px; text-shadow: 0 2px 18px rgba(0,0,0,0.45); }
+    .brand-row .tagline { font-size: 15px; color: var(--sand-dim); margin-top: 8px; }
+    .jump-chips { grid-row: 2; }
+    .top-grid { grid-row: 3; grid-template-rows: auto 1fr; }
+    .top-form { grid-column: 1; grid-row: 1; }
+    .top-side { grid-column: 2; grid-row: 1 / span 2; }
+    .top-hertz { grid-column: 1; grid-row: 2; }
+    .top-grid { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+    .top-form .itin-form { padding: 26px; }
+    .top .routes { display: flex; grid-template-columns: none; }
+    .top #trip-concierge .module-eyebrow, .top #trip-concierge .module-h2, .top #trip-concierge .module-sub { text-align: left; }
+    .qs-card { padding: 22px 24px; }
+    .qs-app .cards { flex-direction: row; }
+    .qs-app .cards .card { flex: 1; }
+    .jump-chips { grid-column: 1 / -1; justify-content: center; }
+  }
+
 </style>
 <style>
   :root {
@@ -174,36 +243,10 @@
     position: relative;
   }
 
-  .hero {
-    display: flex;
-    flex-direction: column;
-  }
 
-  .hero-media { order: 1; }
-  .hero-content { order: 2; }
 
-  .cover-banner {
-    position: relative;
-    width: calc(100% + 40px);
-    margin-left: -20px;
-    margin-top: -48px;
-    margin-bottom: 28px;
-    height: 220px;
-    overflow: hidden;
-  }
 
-  .cover-banner img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
 
-  .cover-fade {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, rgba(14,26,23,0.05) 0%, rgba(14,26,23,0.35) 55%, var(--ink) 100%);
-  }
 
   .stamp {
     width: 84px;
@@ -879,6 +922,95 @@
   }
   .activities-fallback a { color: var(--lagoon); }
 
+  /* ================= WHERE TO STAY — CURATED HOTELS (Supabase `hotels`) ================= */
+
+  .stay-wrap { margin: 20px 0 34px; }
+
+  .stay-scroll {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    padding: 4px 2px 12px;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+  }
+  .stay-scroll::-webkit-scrollbar { height: 6px; }
+  .stay-scroll::-webkit-scrollbar-thumb { background: rgba(245,240,230,0.15); border-radius: 4px; }
+  @media (min-width: 960px) {
+    .stay-scroll { display: grid; grid-template-columns: repeat(3, 1fr); overflow: visible; }
+  }
+
+  .stay-card {
+    position: relative;
+    flex: 0 0 auto;
+    width: 270px;
+    scroll-snap-align: start;
+    background: rgba(245,240,230,0.04);
+    border: 1px solid rgba(245,240,230,0.12);
+    border-radius: 4px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+  @media (min-width: 960px) { .stay-card { width: auto; } }
+  a.stay-card:hover, a.stay-card:focus-visible {
+    transform: translateY(-4px);
+    border-color: rgba(245,240,230,0.3);
+    box-shadow: 0 24px 44px -16px rgba(0,0,0,0.6);
+    outline: none;
+  }
+  .stay-card[hidden] { display: none; }
+
+  .stay-photo, .stay-photo-fallback { width: 100%; aspect-ratio: 3 / 2; }
+  .stay-photo { height: auto; object-fit: cover; display: block; background: rgba(245,240,230,0.05); }
+  .stay-photo-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    text-align: center;
+    font-family: 'Fraunces', serif;
+    font-size: 15px;
+    color: rgba(245,240,230,0.45);
+    background: linear-gradient(135deg, rgba(61,122,107,0.25), rgba(201,98,45,0.12));
+  }
+
+  .stay-stars {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(14,26,23,0.75);
+    color: var(--clay);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    padding: 3px 8px;
+    border-radius: 20px;
+    backdrop-filter: blur(2px);
+  }
+
+  .stay-body { padding: 14px 15px 15px; display: flex; flex-direction: column; gap: 7px; flex: 1; }
+  .stay-name { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 500; line-height: 1.25; }
+  .stay-area { font-size: 11px; color: var(--stone); letter-spacing: 0.04em; text-transform: uppercase; }
+  .stay-why { font-family: 'Fraunces', serif; font-style: italic; font-size: 13px; line-height: 1.45; color: var(--sand-dim); }
+  .stay-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+  .stay-tag {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 20px;
+    background: rgba(61,122,107,0.2);
+    color: var(--lagoon);
+  }
+  .stay-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: auto; padding-top: 6px; }
+  .stay-cta { font-size: 12px; font-weight: 600; color: var(--clay); }
+  .stay-cta.pending { color: var(--stone); font-weight: 500; }
+  .stay-credit { font-size: 9.5px; color: rgba(139,129,117,0.8); text-align: right; }
+
   /* ================= GETYOURGUIDE REGION EXPLORER ================= */
 
   .collections {
@@ -1118,23 +1250,7 @@
     .page-wrap { padding: 0 40px 96px; }
     .page { max-width: 1180px; }
 
-    .hero {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      align-items: center;
-      gap: 72px;
-      padding-top: 88px;
-      padding-bottom: 20px;
-    }
-    .hero-media { order: 2; }
-    .hero-content { order: 1; display: flex; flex-direction: column; align-items: flex-start; }
 
-    .cover-banner {
-      width: 100%;
-      margin: 0;
-      height: 560px;
-      border-radius: 6px;
-    }
 
     .stamp { margin: 0 0 22px; }
 
@@ -1172,9 +1288,11 @@
   <div class="topbar-inner">
     <a href="#" class="topbar-wordmark">Moris Diaries</a>
     <nav>
+      <a href="#where-to-stay">Where to Stay</a>
       <a href="#activities">Activities</a>
       <a href="#trip-concierge">Itineraries</a>
       <a href="#downloads">Get the App</a>
+      <a href="https://wa.me/447507822532?text=Hi%20Moris%20Diaries%2C%20I%27m%20planning%20a%20trip%20to%20Mauritius" class="nav-wa" target="_blank" rel="noopener">WhatsApp us</a>
     </nav>
   </div>
 </div>
@@ -1182,45 +1300,22 @@
 <div class="page-wrap">
 <div class="page">
 
-  <div class="hero">
-    <div class="hero-media">
-      <div class="cover-banner">
-        <img src="assets/cover-banner.jpg" alt="Mauritius coastal road, aerial view" width="900" height="505">
-        <div class="cover-fade"></div>
+  <div class="top">
+    <div class="brand-row">
+      <div class="stamp"><img src="assets/stamp.jpg" alt="Moris Diaries logo" width="84" height="84"></div>
+      <div>
+        <h1>Moris Diaries</h1>
+        <p class="tagline">Built only for the island — <em>not another travel app</em></p>
       </div>
     </div>
 
-    <div class="hero-content">
-      <div class="stamp"><img src="assets/stamp.jpg" alt="Moris Diaries logo" width="84" height="84"></div>
-      <h1>Moris Diaries</h1>
-      <p class="tagline">Built only for the island — <em>not another travel app</em></p>
+    <div class="banner-hero">
+      <img src="assets/hero-banner.jpg" alt="Chamarel viewpoint over Le Morne, Île aux Bénitiers and La Tourelle du Tamarin" width="2400" height="931">
+    </div>
 
-      <div class="cards" id="downloads">
-        <a href="https://apps.apple.com/gb/app/moris-diaries/id6740001732" class="card c-ios" id="ios-link">
-          <div class="card-icon">🍎</div>
-          <div class="card-body">
-            <div class="card-label">Download</div>
-            <div class="card-title">iOS — App Store</div>
-          </div>
-          <div class="card-arrow">→</div>
-        </a>
-
-        <a href="https://play.google.com/store/apps/details?id=com.thedodocollective.travelapp" class="card c-android" id="android-link">
-          <div class="card-icon">🤖</div>
-          <div class="card-body">
-            <div class="card-label">Download</div>
-            <div class="card-title">Android — Google Play</div>
-          </div>
-          <div class="card-arrow">→</div>
-        </a>
-      </div>
-
-      <div class="browser-notice" id="browser-notice" style="display:none;">
-        <span class="notice-icon">⚠</span>
-        <span>Links may not open here. Tap <strong>•••</strong> above and choose <strong>Open in Browser</strong> for the smoothest download.</span>
-      </div>
-
-      <div class="itin-form" id="itin-form">
+    <div class="top-grid">
+      <div class="top-form">
+        <div class="itin-form" id="itin-form">
         <div class="itin-form-head">Tell us your trip</div>
         <div class="itin-form-sub">A real person on the team builds your route.</div>
 
@@ -1272,21 +1367,36 @@
           <div class="itin-form-fine">or email <a href="mailto:hello@thedodocollective.com">hello@thedodocollective.com</a></div>
         </form>
       </div>
-    </div>
-  </div>
+      </div>
+      <div class="top-side">
+        <div class="qs-card qs-app">
+          <div class="qs-eyebrow">Get the app</div>
+          <div class="qs-title">Your island, offline</div>
+          <div class="cards" id="downloads">
+        <a href="https://apps.apple.com/gb/app/moris-diaries/id6740001732" class="card c-ios" id="ios-link">
+          <div class="card-icon">🍎</div>
+          <div class="card-body">
+            <div class="card-label">Download</div>
+            <div class="card-title">iOS — App Store</div>
+          </div>
+          <div class="card-arrow">→</div>
+        </a>
 
-  <a href="https://www.hertz.mu/" target="_blank" rel="noopener sponsored" class="partner-banner" id="partner-banner-hertz">
-    <img src="assets/hertz-partner-banner.jpg" alt="Moris Diaries x Hertz Mauritius — 15% off your car hire with code MORISD" width="1536" height="1024" loading="lazy">
-  </a>
-
-  <div class="section-divider">
-    <svg viewBox="0 0 400 24" preserveAspectRatio="none">
-      <path d="M0,12 Q20,2 40,12 T80,12 T120,12 T160,12 T200,12 T240,12 T280,12 T320,12 T360,12 T400,12"
-            fill="none" stroke="rgba(201,98,45,0.5)" stroke-width="1.5"/>
-    </svg>
-  </div>
-
-  <div id="trip-concierge">
+        <a href="https://play.google.com/store/apps/details?id=com.thedodocollective.travelapp" class="card c-android" id="android-link">
+          <div class="card-icon">🤖</div>
+          <div class="card-body">
+            <div class="card-label">Download</div>
+            <div class="card-title">Android — Google Play</div>
+          </div>
+          <div class="card-arrow">→</div>
+        </a>
+      </div>
+          <div class="browser-notice" id="browser-notice" style="display:none;">
+        <span class="notice-icon">⚠</span>
+        <span>Links may not open here. Tap <strong>•••</strong> above and choose <strong>Open in Browser</strong> for the smoothest download.</span>
+      </div>
+        </div>
+        <div id="trip-concierge">
     <div class="module-eyebrow">✦ Trip Concierge</div>
     <h2 class="module-h2">A Free Custom Itinerary</h2>
     <p class="module-sub">Three routes, hand-built from the app's real posts and places. Pick one, or tell us your dates below.</p>
@@ -1348,29 +1458,29 @@
 
     </div>
   </div>
-
-  <div class="signature">
-    <div class="signature-eyebrow">✦ Signature Day</div>
-    <h3>Full‑Day Island Vibes</h3>
-    <div class="meta">
-      <span>🕕 6:00–13:30 or 9:30–15:00</span>
-      <span>👥 2 guests min</span>
+      </div>
+      <div class="top-hertz"><a href="https://www.hertz.mu/" target="_blank" rel="noopener sponsored" class="partner-banner" id="partner-banner-hertz">
+    <img src="assets/hertz-partner-banner.jpg" alt="Moris Diaries x Hertz Mauritius — 15% off your car hire with code MORISD" width="1536" height="1024" loading="lazy">
+  </a></div>
     </div>
-    <ul>
-      <li>🐬 Swim with dolphins</li>
-      <li>🐢 Snorkelling & turtle encounter</li>
-      <li>🪨✨ Visit the famous Crystal Rock</li>
-      <li>🍴🔥 BBQ on Île aux Bénitiers — chicken, lobster, fish, salads & dessert</li>
-      <li>🥂 Drinks on board — soft & alcoholic</li>
-    </ul>
-    <span class="swap-note">Swap into any route above as one signature day</span>
+
+    <nav class="jump-chips" aria-label="Jump to">
+      <a href="#where-to-stay">🏨 Where to Stay</a>
+      <a href="#activities">🌊 Activities</a>
+      <a href="#trip-concierge">🗺️ Itineraries</a>
+      <a href="#partner-banner-hertz">🚗 Car hire</a>
+    </nav>
   </div>
 
-  <div class="section-divider">
-    <svg viewBox="0 0 400 24" preserveAspectRatio="none">
-      <path d="M0,12 Q20,2 40,12 T80,12 T120,12 T160,12 T200,12 T240,12 T280,12 T320,12 T360,12 T400,12"
-            fill="none" stroke="rgba(201,98,45,0.5)" stroke-width="1.5"/>
-    </svg>
+  <div class="stay-wrap" id="where-to-stay" style="display:none;">
+    <div class="module-eyebrow">✦ Where to Stay</div>
+    <h2 class="module-h2">Hotels We'd Book</h2>
+    <p class="module-sub">A short list, hand-picked by region and by the kind of trip you're planning.</p>
+
+    <div class="activities-filter" id="stayFilter" role="tablist"></div>
+    <div class="stay-scroll" id="stayCards" aria-live="polite"></div>
+
+    <p class="activities-disclosure" id="stayDisclosure" style="display:none;">Hotel links go through our travel affiliate partners — we may earn a small commission on bookings, at no extra cost to you.</p>
   </div>
 
   <div class="activities-wrap" id="activities">
@@ -1428,6 +1538,30 @@
     </div>
 
     <p class="activities-disclosure" id="activitiesDisclosure" style="display:none;">Some activities on this page are booked through travel affiliates — we may earn a small commission on qualifying bookings, at no extra cost to you.</p>
+  </div>
+
+  <div class="section-divider">
+    <svg viewBox="0 0 400 24" preserveAspectRatio="none">
+      <path d="M0,12 Q20,2 40,12 T80,12 T120,12 T160,12 T200,12 T240,12 T280,12 T320,12 T360,12 T400,12"
+            fill="none" stroke="rgba(201,98,45,0.5)" stroke-width="1.5"/>
+    </svg>
+  </div>
+
+  <div class="signature">
+    <div class="signature-eyebrow">✦ Signature Day</div>
+    <h3>Full‑Day Island Vibes</h3>
+    <div class="meta">
+      <span>🕕 6:00–13:30 or 9:30–15:00</span>
+      <span>👥 2 guests min</span>
+    </div>
+    <ul>
+      <li>🐬 Swim with dolphins</li>
+      <li>🐢 Snorkelling & turtle encounter</li>
+      <li>🪨✨ Visit the famous Crystal Rock</li>
+      <li>🍴🔥 BBQ on Île aux Bénitiers — chicken, lobster, fish, salads & dessert</li>
+      <li>🥂 Drinks on board — soft & alcoholic</li>
+    </ul>
+    <span class="swap-note">Swap into any route above as one signature day</span>
   </div>
 
   <div class="social-row">
@@ -2203,6 +2337,176 @@
       .catch(function () {
         showFallbackLink();
       });
+  })();
+</script>
+
+<script>
+  // Where to Stay — curated hotels from Supabase `hotels`, the same catalogue the app's
+  // Hotel Concierge uses; only rows with is_web_pick show here, ordered by web_sort_order.
+  // booking_url is the Travelpayouts-tracked Trip.com link — a hotel without one still
+  // shows, just not as a link. The whole section self-hides if there are no picks.
+  (function () {
+    var SUPABASE_URL = "https://uyavmmgignbwbfhzwyjl.supabase.co";
+    var SUPABASE_ANON_KEY = "sb_publishable_LIKG4Yp7PQ7oCHPzGepuBA_aBsHvsN8";
+
+    var wrap = document.getElementById('where-to-stay');
+    var cardsEl = document.getElementById('stayCards');
+    var filterBar = document.getElementById('stayFilter');
+    var disclosure = document.getElementById('stayDisclosure');
+    if (!wrap || !cardsEl) return;
+
+    // Filter tabs appear in this order, and only for tags at least one pick carries.
+    var TAG_LABEL = {
+      honeymoon: 'Honeymoon', family: 'Family', luxury: 'Luxury', golf: 'Golf',
+      'all-inclusive': 'All-Inclusive', 'adults-only': 'Adults Only', value: 'Great Value'
+    };
+    var REGION_LABEL = { north: 'North coast', south: 'South coast', east: 'East coast', west: 'West coast', centre: 'Central' };
+
+    function photoFallback(hotel) {
+      var div = document.createElement('div');
+      div.className = 'stay-photo-fallback';
+      div.textContent = hotel.name;
+      return div;
+    }
+
+    function buildCard(hotel) {
+      var card = document.createElement(hotel.booking_url ? 'a' : 'div');
+      card.className = 'stay-card';
+      card.setAttribute('data-tags', (hotel.tags || []).join(' '));
+      if (hotel.booking_url) {
+        card.href = hotel.booking_url;
+        card.target = '_blank';
+        card.rel = 'noopener sponsored';
+        card.addEventListener('click', function () {
+          if (window.trackEvent) {
+            window.trackEvent('hotel_click', hotel.name, {
+              partner: hotel.booking_partner || null,
+              slug: hotel.slug,
+              region: hotel.region || null
+            });
+          }
+        });
+      }
+
+      if (hotel.hero_image_url) {
+        var img = document.createElement('img');
+        img.className = 'stay-photo';
+        img.src = hotel.hero_image_url;
+        img.alt = hotel.name;
+        img.loading = 'lazy';
+        img.decoding = 'async';
+        img.width = 540;
+        img.height = 360;
+        img.onerror = function () { img.replaceWith(photoFallback(hotel)); };
+        card.appendChild(img);
+      } else {
+        card.appendChild(photoFallback(hotel));
+      }
+
+      if (hotel.star_rating) {
+        var stars = document.createElement('span');
+        stars.className = 'stay-stars';
+        stars.textContent = new Array(hotel.star_rating + 1).join('★');
+        stars.setAttribute('aria-label', hotel.star_rating + ' star');
+        card.appendChild(stars);
+      }
+
+      var body = document.createElement('div');
+      body.className = 'stay-body';
+
+      var area = document.createElement('div');
+      area.className = 'stay-area';
+      area.textContent = [hotel.area, REGION_LABEL[hotel.region]].filter(Boolean).join(' · ');
+      if (area.textContent) body.appendChild(area);
+
+      var name = document.createElement('div');
+      name.className = 'stay-name';
+      name.textContent = hotel.name;
+      body.appendChild(name);
+
+      var why = document.createElement('div');
+      why.className = 'stay-why';
+      why.textContent = hotel.why_we_love || hotel.tagline || '';
+      if (why.textContent) body.appendChild(why);
+
+      var tags = (hotel.tags || []).filter(function (t) { return TAG_LABEL[t]; });
+      if (tags.length) {
+        var tagRow = document.createElement('div');
+        tagRow.className = 'stay-tags';
+        tags.forEach(function (t) {
+          var chip = document.createElement('span');
+          chip.className = 'stay-tag';
+          chip.textContent = TAG_LABEL[t];
+          tagRow.appendChild(chip);
+        });
+        body.appendChild(tagRow);
+      }
+
+      var foot = document.createElement('div');
+      foot.className = 'stay-foot';
+      var cta = document.createElement('span');
+      cta.className = 'stay-cta' + (hotel.booking_url ? '' : ' pending');
+      cta.textContent = hotel.booking_url
+        ? 'Check prices on ' + (hotel.booking_partner || 'Trip.com') + ' →'
+        : 'Booking link coming soon';
+      foot.appendChild(cta);
+      if (hotel.photo_credit) {
+        var credit = document.createElement('span');
+        credit.className = 'stay-credit';
+        credit.textContent = hotel.photo_credit;
+        foot.appendChild(credit);
+      }
+      body.appendChild(foot);
+
+      card.appendChild(body);
+      return card;
+    }
+
+    function buildFilter(hotels) {
+      var present = {};
+      hotels.forEach(function (h) { (h.tags || []).forEach(function (t) { present[t] = true; }); });
+      var options = [{ key: 'all', label: 'All Stays' }];
+      Object.keys(TAG_LABEL).forEach(function (t) { if (present[t]) options.push({ key: t, label: TAG_LABEL[t] }); });
+      if (options.length < 3) { filterBar.style.display = 'none'; return; }
+
+      options.forEach(function (opt) {
+        var tab = document.createElement('button');
+        tab.type = 'button';
+        tab.className = 'filter-tab' + (opt.key === 'all' ? ' active' : '');
+        tab.textContent = opt.label;
+        tab.addEventListener('click', function () {
+          filterBar.querySelectorAll('.filter-tab').forEach(function (t) { t.classList.toggle('active', t === tab); });
+          cardsEl.querySelectorAll('.stay-card').forEach(function (card) {
+            var cardTags = card.getAttribute('data-tags').split(' ');
+            card.hidden = opt.key !== 'all' && cardTags.indexOf(opt.key) === -1;
+          });
+        });
+        filterBar.appendChild(tab);
+      });
+    }
+
+    var params = new URLSearchParams({
+      select: 'name,slug,tagline,region,area,star_rating,tags,why_we_love,hero_image_url,photo_credit,booking_url,booking_partner',
+      is_web_pick: 'eq.true',
+      is_active: 'eq.true',
+      order: 'web_sort_order.asc,name.asc'
+    });
+
+    fetch(SUPABASE_URL + '/rest/v1/hotels?' + params.toString(), {
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY }
+    })
+      .then(function (res) {
+        if (!res.ok) throw new Error('hotels fetch failed: ' + res.status);
+        return res.json();
+      })
+      .then(function (hotels) {
+        if (!hotels.length) return;
+        hotels.forEach(function (h) { cardsEl.appendChild(buildCard(h)); });
+        buildFilter(hotels);
+        if (disclosure && hotels.some(function (h) { return h.booking_url; })) disclosure.style.display = 'block';
+        wrap.style.display = 'block';
+      })
+      .catch(function () { /* section stays hidden */ });
   })();
 </script>
 
