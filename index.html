@@ -944,6 +944,11 @@
     .gyg-live-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); overflow: visible; }
   }
 
+  /* ================= FLIGHTS — KIWI.COM WIDGET VIA TRAVELPAYOUTS ================= */
+
+  .flights-wrap { margin: 0 0 56px; }
+  .flights-widget { max-width: 860px; margin: 0 auto; border-radius: 8px; overflow: hidden; }
+
   /* ================= WHERE TO STAY — CURATED HOTELS (Supabase `hotels`) ================= */
 
   .stay-wrap { margin: 20px 0 34px; }
@@ -1487,11 +1492,23 @@
     </div>
 
     <nav class="jump-chips" aria-label="Jump to">
+      <a href="#flights">✈️ Flights</a>
       <a href="#where-to-stay">🏨 Where to Stay</a>
       <a href="#activities">🌊 Activities</a>
       <a href="#trip-concierge">🗺️ Itineraries</a>
       <a href="#partner-banner-hertz">🚗 Car hire</a>
     </nav>
+  </div>
+
+  <!-- Getting here — Kiwi.com flight search via Travelpayouts (marker 702473); the script
+       inserts Kiwi's iframe next to itself, so it has to stay inline here. -->
+  <div class="flights-wrap" id="flights">
+    <div class="module-eyebrow">✦ Getting Here</div>
+    <h2 class="module-h2">Flights to Mauritius</h2>
+    <p class="module-sub">Compare fares into Sir Seewoosagur Ramgoolam (MRU) and book with Kiwi.com.</p>
+    <div class="flights-widget">
+      <script async src="https://tpwgts.com/content?currency=usd&trs=585404&shmarker=702473&powered_by=true&locale=en&to_name=mauritius-island_mu&show_header=true&limit=4&primary_color=00AE98&results_background_color=FFFFFF&form_background_color=FFFFFF&campaign_id=111&promo_id=4478" charset="utf-8"></script>
+    </div>
   </div>
 
   <div class="stay-wrap" id="where-to-stay" style="display:none;">
@@ -1710,6 +1727,18 @@
       if (androidCard) androidCard.addEventListener('click', function () { window.trackEvent('download_click', 'android'); });
       if (hertzBanner) hertzBanner.addEventListener('click', function () { window.trackEvent('partner_banner_click', 'Hertz', { partner: 'Hertz' }); });
     }
+
+    // Kiwi's flight widget is a cross-origin iframe, so clicks inside it can't be seen
+    // directly. The page losing focus to that iframe means someone started using it;
+    // log it once per page view.
+    var flightsLogged = false;
+    window.addEventListener('blur', function () {
+      var el = document.activeElement;
+      if (!flightsLogged && el && el.tagName === 'IFRAME' && el.closest && el.closest('#flights')) {
+        flightsLogged = true;
+        window.trackEvent('flight_widget', 'Kiwi.com', { partner: 'Kiwi.com' });
+      }
+    });
 
     // Plain WhatsApp links (top bar, activities fallback) — tagged with data-wa-source.
     // The trip form logs whatsapp_submit and activity cards log activity_click instead.
