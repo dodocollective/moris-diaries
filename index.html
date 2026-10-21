@@ -100,6 +100,9 @@
   .top #trip-concierge .module-sub { text-align: left; margin: 0 0 12px; max-width: none; font-size: 12.5px; }
   .top #trip-concierge > svg { display: none; }
   .top .routes { display: flex; flex-direction: column; gap: 10px; }
+  @media (max-width: 959px) {
+    .top .route-card .card-desc { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+  }
   .jump-chips { grid-row: 2; }
   .banner-hero { grid-row: 1; width: calc(100% + 40px); margin: -22px 0 0 -20px; overflow: hidden; }
   .banner-hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(14,26,23,0.9) 0%, rgba(14,26,23,0.25) 55%, rgba(14,26,23,0) 100%); }
@@ -963,9 +966,7 @@
   }
   .stay-scroll::-webkit-scrollbar { height: 6px; }
   .stay-scroll::-webkit-scrollbar-thumb { background: rgba(245,240,230,0.15); border-radius: 4px; }
-  @media (min-width: 960px) {
-    .stay-scroll { display: grid; grid-template-columns: repeat(3, 1fr); overflow: visible; }
-  }
+
 
   .stay-card {
     position: relative;
@@ -982,7 +983,6 @@
     color: inherit;
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   }
-  @media (min-width: 960px) { .stay-card { width: auto; } }
   a.stay-card:hover, a.stay-card:focus-visible {
     transform: translateY(-4px);
     border-color: rgba(245,240,230,0.3);
@@ -1128,6 +1128,26 @@
 
   .feed-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
   .feed-grid .activity-card { width: 100%; }
+  .feed-grid:not(.show-all) .activity-card:nth-child(n+5) { display: none; }
+  @media (min-width: 640px) {
+    .feed-grid:not(.show-all) .activity-card:nth-child(n+5) { display: flex; }
+    .feed-grid:not(.show-all) .activity-card:nth-child(n+7) { display: none; }
+  }
+
+  .more-ways-toggle {
+    display: block;
+    margin: 18px auto 0;
+    padding: 11px 20px;
+    background: none;
+    border: 1px solid rgba(245,240,230,0.25);
+    border-radius: 4px;
+    color: var(--sand);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .more-ways-toggle:hover, .more-ways-toggle:focus-visible { border-color: var(--clay); color: var(--clay); }
 
   @media (min-width: 640px) {
     .feed-grid { grid-template-columns: repeat(3, minmax(0,1fr)); }
@@ -1570,6 +1590,9 @@
     <div id="more-ways-to-book">
       <div class="eyebrow" id="moreWaysHead" style="display:none; text-align:center; margin:52px 0 20px;">More Ways To Book</div>
 
+      <button type="button" class="more-ways-toggle" id="moreWaysToggle" aria-expanded="false" aria-controls="moreWaysBody" style="display:none;">Show Direct &amp; Viator activities</button>
+
+      <div id="moreWaysBody">
       <div class="activities-filter" id="activitiesFilter" role="tablist" style="display:none;"></div>
       <div class="activities-filter activities-filter-type" id="activitiesTypeFilter" role="tablist" style="display:none;"></div>
 
@@ -1583,6 +1606,7 @@
             <div class="activity-card skeleton"><div class="activity-photo-fallback">Loading…</div><div class="activity-body"><div class="activity-title">Loading activity</div><div class="activity-meta">Loading</div><div class="activity-foot"><div class="activity-price">from €0.00</div></div></div></div>
           </div>
         </div>
+      </div>
       </div>
     </div>
 
@@ -1823,10 +1847,6 @@
     var typeFilterBar = document.getElementById('activitiesTypeFilter');
     if (!rowsWrap || !wrap) return;
 
-    // A shelf wider than this splits into two stacked scroll tracks so more of it is
-    // visible at once, instead of one row hiding most of a large bucket off-screen.
-    var TWO_TRACK_THRESHOLD = 6;
-
     // adult_price is stored in cents.
     function fmtPrice(cents) {
       var n = parseFloat(cents);
@@ -2043,13 +2063,9 @@
       }
       row.appendChild(head);
 
-      // Split into two stacked tracks once a shelf has enough items that a single row
-      // would hide most of it off-screen — both tracks share one pair of nav arrows.
+      // One scroll track per shelf — stacking a second track nearly doubled the page
+      // length; every card is still there, a swipe or arrow away.
       var chunks = [items];
-      if (items.length > TWO_TRACK_THRESHOLD) {
-        var mid = Math.ceil(items.length / 2);
-        chunks = [items.slice(0, mid), items.slice(mid)];
-      }
 
       var viewport = document.createElement('div');
       viewport.className = 'activity-row-viewport';
@@ -2152,6 +2168,29 @@
       return e;
     }
 
+    // With GetYourGuide's explorer above it, the Direct/Viator rows start collapsed behind
+    // a button. The cards stay in the page (hidden, not removed), so their click tracking
+    // and GetYourGuide's link scan are unaffected; opening it logs section_expand.
+    function collapseMoreWays() {
+      var body = document.getElementById('moreWaysBody');
+      var toggle = document.getElementById('moreWaysToggle');
+      if (!body || !toggle || toggle.getAttribute('data-ready')) return;
+      toggle.setAttribute('data-ready', '1');
+      body.hidden = true;
+      toggle.style.display = 'block';
+      function open(source) {
+        if (!body.hidden) return;
+        body.hidden = false;
+        toggle.style.display = 'none';
+        toggle.setAttribute('aria-expanded', 'true');
+        if (window.trackEvent) window.trackEvent('section_expand', 'more-ways', { source: source });
+      }
+      toggle.addEventListener('click', function () { open('button'); });
+      document.querySelectorAll('a[href="#more-ways-to-book"]').forEach(function (link) {
+        link.addEventListener('click', function () { open('link'); });
+      });
+    }
+
     function buildGygExplorer(activities) {
       var gygExplorer = document.getElementById('gygExplorer');
       var gygCollections = document.getElementById('gygCollections');
@@ -2165,6 +2204,7 @@
 
       var gygActivities = activities.filter(function (a) { return providerKind(a) === 'getyourguide'; });
       if (moreWaysHead && gygActivities.length) moreWaysHead.style.display = 'block';
+      if (gygActivities.length) collapseMoreWays();
       if (!gygActivities.length) return;
       gygExplorer.style.display = 'block';
 
@@ -2272,6 +2312,26 @@
           return r && r.id === currentRegion;
         });
         items.forEach(function (a) { gygFeed.appendChild(buildCard(a)); });
+
+        // Show the first FEED_LIMIT cards (4 on mobile, 6 on desktop); the rest stay in the
+        // DOM, hidden by CSS until "Show all" adds .show-all.
+        var limit = window.matchMedia('(min-width: 640px)').matches ? 6 : 4;
+        gygFeed.classList.remove('show-all');
+        var more = document.getElementById('gygFeedMore');
+        if (more) more.remove();
+        if (items.length > limit) {
+          more = document.createElement('button');
+          more.type = 'button';
+          more.id = 'gygFeedMore';
+          more.className = 'more-ways-toggle';
+          more.textContent = 'Show all ' + items.length + ' in ' + region.name;
+          more.addEventListener('click', function () {
+            gygFeed.classList.add('show-all');
+            more.remove();
+            if (window.trackEvent) window.trackEvent('section_expand', 'gyg-feed', { region: region.id });
+          });
+          gygFeed.parentNode.insertBefore(more, gygFeed.nextSibling);
+        }
       }
 
       function selectCollection(id) {
