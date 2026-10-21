@@ -924,6 +924,26 @@
   }
   .activities-fallback a { color: var(--lagoon); }
 
+  /* ================= GETYOURGUIDE LIVE AVAILABILITY (Supabase `activities`) ================= */
+
+  .gyg-live { margin: 0 0 44px; }
+  .gyg-live-head { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 4px 10px; margin-bottom: 14px; padding: 0 2px; }
+  .gyg-live-title { font-family: 'Fraunces', serif; font-weight: 500; font-size: 18px; }
+  .gyg-live-sub { font-size: 11px; color: var(--stone); }
+  .gyg-live-row { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 10px; scroll-snap-type: x mandatory; }
+  .gyg-live-card {
+    flex: 0 0 min(86vw, 340px);
+    scroll-snap-align: start;
+    background: #fff;
+    border: 1px solid rgba(245,240,230,0.2);
+    border-radius: 8px;
+    overflow: hidden;
+    min-height: 430px; /* holds the space while GetYourGuide's iframe loads */
+  }
+  @media (min-width: 960px) {
+    .gyg-live-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); overflow: visible; }
+  }
+
   /* ================= WHERE TO STAY — CURATED HOTELS (Supabase `hotels`) ================= */
 
   .stay-wrap { margin: 20px 0 34px; }
@@ -1489,6 +1509,16 @@
     <div class="module-eyebrow">✦ Excursions &amp; Activities</div>
     <h2 class="module-h2">Book an Activity</h2>
     <p class="module-sub">Curated with GetYourGuide, or explore the island to find it — every activity is pinned to where it actually happens.</p>
+
+    <!-- Live availability — GetYourGuide's calendar widget for activities flagged
+         show_availability_widget in Supabase; self-hides with none -->
+    <div class="gyg-live" id="gygLive" style="display:none;">
+      <div class="gyg-live-head">
+        <span class="gyg-live-title">Live availability</span>
+        <span class="gyg-live-sub">Pick a date · book with GetYourGuide</span>
+      </div>
+      <div class="gyg-live-row" id="gygLiveRow"></div>
+    </div>
 
     <!-- GetYourGuide region explorer — self-hides if there are no GetYourGuide activities -->
     <div id="gygExplorer" style="display:none;">
@@ -2339,6 +2369,70 @@
       .catch(function () {
         showFallbackLink();
       });
+  })();
+</script>
+
+<script>
+  // Live availability — GetYourGuide's own availability widget for each activity flagged
+  // show_availability_widget (ordered by availability_sort_order). The tour id comes from
+  // the activity's GetYourGuide url (…-t306848/…). GetYourGuide's partner script renders
+  // the widgets and also reports widget/link impressions to the partner dashboard, so it's
+  // loaded only after the widget divs exist — it scans the page when it starts.
+  (function () {
+    var SUPABASE_URL = "https://uyavmmgignbwbfhzwyjl.supabase.co";
+    var SUPABASE_ANON_KEY = "sb_publishable_LIKG4Yp7PQ7oCHPzGepuBA_aBsHvsN8";
+    var GYG_PARTNER_ID = "QLLRDDE";
+
+    var wrap = document.getElementById('gygLive');
+    var row = document.getElementById('gygLiveRow');
+
+    function loadGygScript() {
+      var s = document.createElement('script');
+      s.src = 'https://widget.getyourguide.com/dist/pa.umd.production.min.js';
+      s.async = true;
+      s.setAttribute('data-gyg-partner-id', GYG_PARTNER_ID);
+      document.head.appendChild(s);
+    }
+
+    function tourId(url) {
+      var m = /-t(\d+)\/?(?:[?#]|$)/.exec(url || '');
+      return m ? m[1] : null;
+    }
+
+    if (!wrap || !row) { loadGygScript(); return; }
+
+    var params = new URLSearchParams({
+      select: 'url',
+      show_availability_widget: 'eq.true',
+      order: 'availability_sort_order.asc,created_at.desc'
+    });
+
+    fetch(SUPABASE_URL + '/rest/v1/activities?' + params.toString(), {
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY }
+    })
+      .then(function (res) {
+        if (!res.ok) throw new Error('availability fetch failed: ' + res.status);
+        return res.json();
+      })
+      .then(function (activities) {
+        var ids = activities.map(function (a) { return tourId(a.url); }).filter(Boolean);
+        ids.forEach(function (id) {
+          var card = document.createElement('div');
+          card.className = 'gyg-live-card';
+          var widget = document.createElement('div');
+          widget.setAttribute('data-gyg-href', 'https://widget.getyourguide.com/default/availability.frame');
+          widget.setAttribute('data-gyg-tour-id', id);
+          widget.setAttribute('data-gyg-locale-code', 'en-US');
+          widget.setAttribute('data-gyg-currency', 'EUR');
+          widget.setAttribute('data-gyg-widget', 'availability');
+          widget.setAttribute('data-gyg-partner-id', GYG_PARTNER_ID);
+          card.appendChild(widget);
+          row.appendChild(card);
+        });
+        if (ids.length) wrap.style.display = 'block';
+      })
+      .catch(function () { /* strip stays hidden */ })
+      .then(loadGygScript);
   })();
 </script>
 
