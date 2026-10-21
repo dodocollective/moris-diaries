@@ -1314,7 +1314,7 @@
       <a href="#activities">Activities</a>
       <a href="#trip-concierge">Itineraries</a>
       <a href="#downloads">Get the App</a>
-      <a href="https://wa.me/447507822532?text=Hi%20Moris%20Diaries%2C%20I%27m%20planning%20a%20trip%20to%20Mauritius" class="nav-wa" target="_blank" rel="noopener">WhatsApp us</a>
+      <a href="https://wa.me/447507822532?text=Hi%20Moris%20Diaries%2C%20I%27m%20planning%20a%20trip%20to%20Mauritius" class="nav-wa" data-wa-source="topbar" target="_blank" rel="noopener">WhatsApp us</a>
     </nav>
   </div>
 </div>
@@ -1710,6 +1710,13 @@
       if (androidCard) androidCard.addEventListener('click', function () { window.trackEvent('download_click', 'android'); });
       if (hertzBanner) hertzBanner.addEventListener('click', function () { window.trackEvent('partner_banner_click', 'Hertz', { partner: 'Hertz' }); });
     }
+
+    // Plain WhatsApp links (top bar, activities fallback) — tagged with data-wa-source.
+    // The trip form logs whatsapp_submit and activity cards log activity_click instead.
+    document.addEventListener('click', function (e) {
+      var link = e.target.closest && e.target.closest('a[data-wa-source]');
+      if (link && window.trackEvent) window.trackEvent('whatsapp_click', link.getAttribute('data-wa-source'));
+    });
   })();
 </script>
 
@@ -2066,7 +2073,7 @@
       rowsWrap.innerHTML = '';
       var p = document.createElement('p');
       p.className = 'activities-fallback';
-      p.innerHTML = 'Activities are loading slowly right now — message us on <a href="https://wa.me/' + WHATSAPP_NUMBER + '" target="_blank" rel="noopener">WhatsApp</a> and we\'ll help you book direct.';
+      p.innerHTML = 'Activities are loading slowly right now — message us on <a href="https://wa.me/' + WHATSAPP_NUMBER + '" data-wa-source="activities-fallback" target="_blank" rel="noopener">WhatsApp</a> and we\'ll help you book direct.';
       rowsWrap.appendChild(p);
     }
 
