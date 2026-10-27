@@ -2261,11 +2261,16 @@
       if (!gygActivities.length) return;
       gygExplorer.style.display = 'block';
 
+      // Trending Now at the top covers every is_trending activity, whatever the provider —
+      // so the separate non-GetYourGuide Trending row under More Ways To Book would only
+      // repeat it, and is dropped.
       var gygTrendingWrap = document.getElementById('gygTrending');
-      var trendingItems = gygActivities.filter(function (a) { return a.is_trending; });
+      var trendingItems = activities.filter(function (a) { return a.is_trending; });
       if (gygTrendingWrap && trendingItems.length) {
         gygTrendingWrap.innerHTML = '';
         gygTrendingWrap.appendChild(buildRow({ key: 'gyg-trending', title: 'Trending Now' }, trendingItems));
+        var dupRow = document.querySelector('#activitiesRows [data-row-key="trending"]');
+        if (dupRow) dupRow.remove();
       }
 
       var currentCollection = 'all';
