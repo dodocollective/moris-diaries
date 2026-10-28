@@ -168,7 +168,9 @@
   .pick img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease; }
   .pick::after { content: ''; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(14,26,23,0.95) 0%, rgba(14,26,23,0.55) 38%, rgba(14,26,23,0) 62%); }
   .pick:hover img { transform: scale(1.05); }
-  .pick:hover, .pick:focus-visible { border-color: rgba(245,240,230,0.4); outline: none; }
+  .pick:hover, .pick:focus-within { border-color: rgba(245,240,230,0.4); }
+  .pick-hit { position: absolute; inset: 0; z-index: 3; width: 100%; height: 100%; padding: 0; border: none; background: none; cursor: pointer; }
+  .pick-hit:focus-visible { outline: none; }
   .pick.selected { border-color: var(--clay); box-shadow: 0 0 0 2px var(--clay); }
 
   .pick-num { position: absolute; top: 10px; left: 10px; z-index: 2; font-family: 'Fraunces', serif; font-style: italic; font-size: 13px; color: var(--sand); background: rgba(14,26,23,0.65); padding: 2px 8px; border-radius: 20px; backdrop-filter: blur(2px); }
@@ -181,7 +183,13 @@
     font-size: 15px; font-weight: 700; line-height: 1;
   }
   .pick.selected .pick-check { background: var(--clay); border-color: var(--clay); }
-  .pick-body { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; padding: 12px; display: flex; flex-direction: column; gap: 4px; }
+  .pick-body { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; padding: 12px; display: flex; flex-direction: column; gap: 4px; pointer-events: none; }
+  .pick-reserve {
+    display: none; position: relative; z-index: 4; pointer-events: auto;
+    margin-top: 6px; padding: 8px 10px; border-radius: 6px;
+    background: #25D366; color: #0E1A17; font-size: 12px; font-weight: 700; text-align: center; text-decoration: none;
+  }
+  .pick.selected .pick-reserve { display: block; }
   .pick-cat { font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--clay); }
   .pick-title { font-family: 'Fraunces', serif; font-size: 15px; font-weight: 500; line-height: 1.2; }
   .pick-meta { font-size: 11px; color: var(--sand-dim); opacity: 0.85; }
@@ -204,7 +212,7 @@
   }
   .picks-bar[hidden] { display: none; }
   .picks-bar b { color: var(--clay); }
-  .picks-bar-cta { padding: 9px 14px; border-radius: 6px; background: var(--lagoon); color: var(--sand); font-weight: 600; text-decoration: none; white-space: nowrap; }
+  .picks-bar-cta { padding: 9px 14px; border-radius: 6px; background: #25D366; color: #0E1A17; font-weight: 700; text-decoration: none; white-space: nowrap; }
 
   .after-picks { display: flex; flex-direction: column; gap: 18px; margin-bottom: 56px; }
   .after-picks #trip-concierge .module-eyebrow { justify-content: flex-start; font-size: 16px; margin: 0 0 4px; }
@@ -1550,7 +1558,7 @@
 
   <div class="picks-bar" id="picksBar" hidden>
     <span><b id="picksBarCount">0</b> picked</span>
-    <a href="#ask" class="picks-bar-cta">Add to my trip →</a>
+    <a href="https://wa.me/447507822532" class="picks-bar-cta" id="picksBarReserve" target="_blank" rel="noopener">Reserve on WhatsApp →</a>
   </div>
 
   <div class="after-picks">
@@ -2854,7 +2862,9 @@
 <script>
   // Moris Diaries Picks — every activity with pick_order set (lowest first), labelled with
   // its short pick_title / pick_subtitle. Tiles toggle a shortlist shown inside the trip
-  // form; window.morisPicksSelected() hands it to that form's WhatsApp message.
+  // form; window.morisPicksSelected() hands it to that form's WhatsApp message. A selected
+  // tile (and the mobile bar) also offers Reserve on WhatsApp straight away
+  // (whatsapp_click, label pick-reserve / picks-bar, with the activities).
   (function () {
     var SUPABASE_URL = "https://uyavmmgignbwbfhzwyjl.supabase.co";
     var SUPABASE_ANON_KEY = "sb_publishable_LIKG4Yp7PQ7oCHPzGepuBA_aBsHvsN8";
@@ -2866,6 +2876,7 @@
     var chipsEl = document.getElementById('askSelected');
     var bar = document.getElementById('picksBar');
     var barCount = document.getElementById('picksBarCount');
+    var barReserve = document.getElementById('picksBarReserve');
     var askPanel = document.getElementById('ask');
     if (!grid || !chipsEl) return;
 
@@ -2899,17 +2910,37 @@
       var on = i === -1;
       if (on) selected.push(p); else selected.splice(i, 1);
       p.el.classList.toggle('selected', on);
-      p.el.setAttribute('aria-pressed', on ? 'true' : 'false');
+      p.el.querySelector('.pick-hit').setAttribute('aria-pressed', on ? 'true' : 'false');
       p.el.querySelector('.pick-check').textContent = on ? '✓' : '+';
       track('pick_select', p.title, { selected: on, source: source, provider: p.provider || null });
       renderChips();
     }
 
+    function reserveText(list) {
+      return "Hi Moris Diaries! I'd like to reserve:\n" +
+        list.map(function (p) { return '• ' + p.title + (p.provider ? ' (' + p.provider + ')' : ''); }).join('\n') +
+        "\n\nPreferred date: \nGuests: ";
+    }
+
+    // Opens WhatsApp with the given picks and records it with the activities named.
+    function reserve(list, label) {
+      track('whatsapp_click', label, {
+        activities: list.map(function (p) { return p.title; }),
+        count: list.length
+      });
+      window.open('https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(reserveText(list)), '_blank');
+    }
+
+    if (barReserve) {
+      barReserve.addEventListener('click', function (e) {
+        e.preventDefault();
+        if (selected.length) reserve(selected.slice(), 'picks-bar');
+      });
+    }
+
     function buildTile(p, n) {
-      var el = document.createElement('button');
-      el.type = 'button';
+      var el = document.createElement('div');
       el.className = 'pick';
-      el.setAttribute('aria-pressed', 'false');
       if (p.photo) {
         var img = document.createElement('img');
         img.src = p.photo;
@@ -2920,11 +2951,18 @@
       }
       el.insertAdjacentHTML('beforeend',
         '<span class="pick-num">' + (n < 9 ? '0' : '') + (n + 1) + '</span><span class="pick-check" aria-hidden="true">+</span>' +
-        '<span class="pick-body"><span class="pick-cat"></span><span class="pick-title"></span><span class="pick-meta"></span></span>');
+        '<button type="button" class="pick-hit" aria-pressed="false"></button>' +
+        '<span class="pick-body"><span class="pick-cat"></span><span class="pick-title"></span><span class="pick-meta"></span>' +
+        '<a class="pick-reserve" href="https://wa.me/' + WHATSAPP_NUMBER + '" target="_blank" rel="noopener">Reserve on WhatsApp →</a></span>');
       el.querySelector('.pick-cat').textContent = CATEGORY_LABEL[p.category] || 'Experience';
       el.querySelector('.pick-title').textContent = p.name;
       el.querySelector('.pick-meta').textContent = p.meta;
-      el.addEventListener('click', function () { toggle(p, 'tile'); });
+      el.querySelector('.pick-hit').setAttribute('aria-label', p.name + ' — add to my trip');
+      el.querySelector('.pick-hit').addEventListener('click', function () { toggle(p, 'tile'); });
+      el.querySelector('.pick-reserve').addEventListener('click', function (e) {
+        e.preventDefault();
+        reserve([p], 'pick-reserve');
+      });
       p.el = el;
       return el;
     }
