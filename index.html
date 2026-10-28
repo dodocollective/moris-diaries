@@ -187,11 +187,8 @@
   .pick-meta { font-size: 11px; color: var(--sand-dim); opacity: 0.85; }
 
   .ask-panel { scroll-margin-top: 16px; }
-  .ask-tabs { display: flex; gap: 4px; padding: 4px; margin-bottom: 10px; background: rgba(245,240,230,0.05); border: 1px solid rgba(245,240,230,0.12); border-radius: 8px; }
-  .ask-tab { flex: 1; padding: 10px 8px; border: none; border-radius: 5px; background: none; color: var(--stone); font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 600; cursor: pointer; }
-  .ask-tab[aria-selected="true"] { background: var(--lagoon); color: var(--sand); }
   .ask-panel .itin-form { margin: 0; width: 100%; max-width: none; }
-  .ask-selected { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 14px; min-height: 30px; }
+  .ask-selected { display: flex; flex-wrap: wrap; gap: 6px; min-height: 30px; }
   .ask-empty { font-size: 12px; color: var(--stone); font-style: italic; align-self: center; }
   .ask-chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 6px 5px 11px; border-radius: 20px; background: rgba(201,98,45,0.16); border: 1px solid rgba(201,98,45,0.45); color: var(--sand); font-size: 12px; }
   .ask-chip button { width: 18px; height: 18px; border-radius: 50%; border: none; background: rgba(245,240,230,0.15); color: var(--sand); font-size: 12px; line-height: 1; cursor: pointer; }
@@ -1483,55 +1480,16 @@
     <div class="picks-head">
       <div class="module-eyebrow">✦ Moris Diaries Picks</div>
       <h2 class="module-h2">Eight Days We'd Book Again</h2>
-      <p class="module-sub">Tried, loved and booked direct with local operators. Tap the ones you like — we'll check dates and prices for you on WhatsApp.</p>
+      <p class="module-sub">Tried, loved and booked direct with local operators. Tap the ones you like and we'll build them into your trip on WhatsApp.</p>
     </div>
 
     <div class="picks-layout">
       <div class="picks-grid" id="picksGrid" aria-label="Moris Diaries picks"></div>
 
       <aside class="ask-panel" id="ask">
-        <div class="ask-tabs" role="tablist">
-          <button type="button" role="tab" class="ask-tab" data-tab="acts" aria-selected="true">Ask about activities</button>
-          <button type="button" role="tab" class="ask-tab" data-tab="trip" aria-selected="false">Plan my whole trip</button>
-        </div>
-
-        <div class="ask-pane" data-pane="acts">
-          <div class="itin-form">
-            <div class="itin-form-head">Your shortlist</div>
-            <div class="itin-form-sub">We reply on WhatsApp with dates, prices and pickup — usually within a few hours.</div>
-            <div class="ask-selected" id="askSelected"><span class="ask-empty">Tap a pick to add it here.</span></div>
-            <form id="actsForm">
-              <div class="field">
-                <label for="actsName">Full name</label>
-                <input type="text" id="actsName" required placeholder="Your name">
-              </div>
-              <div class="field">
-                <label for="actsContact">WhatsApp or email</label>
-                <input type="text" id="actsContact" required placeholder="+230 ... or you@email.com">
-              </div>
-              <div class="field-row">
-                <div class="field">
-                  <label for="actsGuests">Guests</label>
-                  <input type="number" id="actsGuests" min="1" required placeholder="2">
-                </div>
-                <div class="field">
-                  <label for="actsDate">Preferred date</label>
-                  <input type="date" id="actsDate">
-                </div>
-              </div>
-              <div class="field">
-                <label for="actsNote">Anything else?</label>
-                <textarea id="actsNote" rows="2" placeholder="Hotel area, kids' ages, flexible dates…"></textarea>
-              </div>
-              <button type="submit" class="itin-submit">💬 Ask on WhatsApp</button>
-            </form>
-          </div>
-        </div>
-
-        <div class="ask-pane" data-pane="trip" hidden>
           <div class="itin-form" id="itin-form">
         <div class="itin-form-head">Tell us your trip</div>
-        <div class="itin-form-sub">A real person on the team builds your route.</div>
+        <div class="itin-form-sub">A real person on the team builds your route — tap any of our picks to add it.</div>
 
         <form id="tripForm">
           <div class="field">
@@ -1569,11 +1527,16 @@
               <label class="chip"><input type="radio" name="route" value="Honeymoon Route">Honeymoon</label>
               <label class="chip"><input type="radio" name="route" value="Chasing Water">Chasing Water</label>
               <label class="chip"><input type="radio" name="route" value="Build me something custom" checked>Custom</label>
+              <label class="chip"><input type="radio" name="route" value="Just activities">Activities only</label>
             </div>
+          </div>
+          <div class="field">
+            <label>Our picks to include</label>
+            <div class="ask-selected" id="askSelected"><span class="ask-empty">Tap any of our picks to add it here.</span></div>
           </div>
           <label class="addon-check">
             <input type="checkbox" id="addon">
-            Add the <strong>Full‑Day Island Vibes</strong> boat trip as one day of my route
+            <span>Add the <strong>Full‑Day Island Vibes</strong> boat trip as one day of my route</span>
           </label>
           <button type="submit" class="itin-submit">
             💬 Send to WhatsApp
@@ -1581,14 +1544,13 @@
           <div class="itin-form-fine">or email <a href="mailto:hello@thedodocollective.com">hello@thedodocollective.com</a></div>
         </form>
       </div>
-        </div>
       </aside>
     </div>
   </section>
 
   <div class="picks-bar" id="picksBar" hidden>
     <span><b id="picksBarCount">0</b> picked</span>
-    <a href="#ask" class="picks-bar-cta">Send on WhatsApp →</a>
+    <a href="#ask" class="picks-bar-cta">Add to my trip →</a>
   </div>
 
   <div class="after-picks">
@@ -1981,18 +1943,29 @@
       var addon = document.getElementById('addon').checked
         ? "\nYes — add the Full-Day Island Vibes boat trip."
         : "";
+      // Shortlisted Moris Diaries Picks (full title + operator), if any.
+      var picks = window.morisPicksSelected ? window.morisPicksSelected() : [];
+      var picksText = picks.length
+        ? "\n\nOur picks I'd like:\n" + picks.map(function (p) { return '• ' + p.title + (p.provider ? ' (' + p.provider + ')' : ''); }).join('\n')
+        : "";
 
       var msg =
-        "Hi Moris Diaries! I'd like a free custom itinerary.\n" +
+        (route === 'Just activities'
+          ? "Hi Moris Diaries! I'd like dates and prices for some activities.\n"
+          : "Hi Moris Diaries! I'd like a free custom itinerary.\n") +
         "Name: " + name + "\n" +
         "Contact: " + contact + "\n" +
         "Guests: " + guests + "\n" +
         "Arrival: " + arrival + "\n" +
         "Trip length: " + days + "\n" +
-        "Route interest: " + route + addon;
+        "Route interest: " + route + addon + picksText;
 
       var url = "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(msg);
-      if (window.trackEvent) window.trackEvent('whatsapp_submit', route);
+      if (window.trackEvent) {
+        window.trackEvent('whatsapp_submit', route, picks.length
+          ? { activities: picks.map(function (p) { return p.title; }), count: picks.length }
+          : null);
+      }
       window.open(url, "_blank");
     });
   }
@@ -2880,9 +2853,8 @@
 
 <script>
   // Moris Diaries Picks — every activity with pick_order set (lowest first), labelled with
-  // its short pick_title / pick_subtitle. Tiles toggle a shortlist; the Ask panel sends it
-  // to WhatsApp (whatsapp_submit, label "Activity request") with each full title. The
-  // second tab holds the original custom-itinerary form, unchanged.
+  // its short pick_title / pick_subtitle. Tiles toggle a shortlist shown inside the trip
+  // form; window.morisPicksSelected() hands it to that form's WhatsApp message.
   (function () {
     var SUPABASE_URL = "https://uyavmmgignbwbfhzwyjl.supabase.co";
     var SUPABASE_ANON_KEY = "sb_publishable_LIKG4Yp7PQ7oCHPzGepuBA_aBsHvsN8";
@@ -2904,7 +2876,7 @@
     function renderChips() {
       chipsEl.innerHTML = '';
       if (!selected.length) {
-        chipsEl.innerHTML = '<span class="ask-empty">Tap a pick to add it here.</span>';
+        chipsEl.innerHTML = '<span class="ask-empty">Tap any of our picks to add it here.</span>';
       }
       selected.forEach(function (p) {
         var chip = document.createElement('span');
@@ -2930,7 +2902,6 @@
       p.el.setAttribute('aria-pressed', on ? 'true' : 'false');
       p.el.querySelector('.pick-check').textContent = on ? '✓' : '+';
       track('pick_select', p.title, { selected: on, source: source, provider: p.provider || null });
-      showTab('acts');
       renderChips();
     }
 
@@ -2958,17 +2929,7 @@
       return el;
     }
 
-    // Tabs
-    var tabs = document.querySelectorAll('.ask-tab');
-    function showTab(name) {
-      tabs.forEach(function (t) { t.setAttribute('aria-selected', t.getAttribute('data-tab') === name ? 'true' : 'false'); });
-      document.querySelectorAll('.ask-pane').forEach(function (pane) { pane.hidden = pane.getAttribute('data-pane') !== name; });
-    }
-    tabs.forEach(function (t) { t.addEventListener('click', function () { showTab(t.getAttribute('data-tab')); }); });
-    // "Request this route" buttons point at #itin-form, which now lives in the second tab.
-    document.querySelectorAll('a[href="#itin-form"]').forEach(function (a) {
-      a.addEventListener('click', function () { showTab('trip'); });
-    });
+    window.morisPicksSelected = function () { return selected.slice(); };
 
     // Mobile: a bar pinned to the bottom once something is picked and the panel is off-screen.
     var panelVisible = false;
@@ -2979,22 +2940,6 @@
         updateBar();
       }, { threshold: 0.15 }).observe(askPanel);
     }
-
-    document.getElementById('actsForm').addEventListener('submit', function (e) {
-      e.preventDefault();
-      var v = function (id) { return document.getElementById(id).value.trim(); };
-      var list = selected.length
-        ? selected.map(function (p) { return '• ' + p.title + (p.provider ? ' (' + p.provider + ')' : ''); }).join('\n')
-        : '• Not sure yet — please recommend';
-      var msg = "Hi Moris Diaries! I'd like dates and prices for:\n" + list + "\n\n" +
-        "Name: " + v('actsName') + "\n" +
-        "Contact: " + v('actsContact') + "\n" +
-        "Guests: " + v('actsGuests') + "\n" +
-        "Preferred date: " + (v('actsDate') || 'Flexible') +
-        (v('actsNote') ? "\nNote: " + v('actsNote') : "");
-      track('whatsapp_submit', 'Activity request', { activities: selected.map(function (p) { return p.title; }), count: selected.length });
-      window.open('https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(msg), '_blank');
-    });
 
     var params = new URLSearchParams({
       select: 'id,title,pick_title,pick_subtitle,category,posts(file,filetype,posterFile),providers(name)',
@@ -3024,12 +2969,11 @@
         });
       })
       .catch(function () {
-        // No picks: drop the tiles and the activity tab, leaving the itinerary form.
+        // No picks: drop the tiles and the shortlist field, leaving the itinerary form.
         grid.style.display = 'none';
         var head = document.querySelector('.picks-head');
         if (head) head.style.display = 'none';
-        document.querySelector('.ask-tabs').style.display = 'none';
-        showTab('trip');
+        chipsEl.parentNode.style.display = 'none';
       });
   })();
 </script>
