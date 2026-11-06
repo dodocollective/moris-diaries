@@ -147,7 +147,8 @@
   .top .jump-chips a[href="#picks"] { border-color: rgba(201,98,45,0.6); color: var(--clay); }
 
   /* ================= MORIS DIARIES PICKS ================= */
-  .picks { margin: 0 0 56px; scroll-margin-top: 16px; }
+  .picks { margin: 0 0 56px; }
+  .picks-head { scroll-margin-top: 16px; }
   .picks-layout { display: flex; flex-direction: column; gap: 18px; }
   .picks-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 
@@ -201,6 +202,12 @@
     .after-picks .route-card .card-desc { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
   }
 
+  /* Mobile: the trip form comes first, above the picks heading and tiles. */
+  @media (max-width: 959px) {
+    .picks { display: flex; flex-direction: column; }
+    .picks-layout { display: contents; }
+    .ask-panel { order: -1; margin-bottom: 48px; }
+  }
   @media (min-width: 640px) {
     .picks-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
   }
@@ -1459,8 +1466,8 @@
 
   <!-- Moris Diaries Picks — the team's favourite days, booked direct with local
        operators. Tap to shortlist; the Ask panel sends the shortlist to WhatsApp. -->
-  <section class="picks" id="picks">
-    <div class="picks-head">
+  <section class="picks">
+    <div class="picks-head" id="picks">
       <div class="module-eyebrow">✦ Moris Diaries Picks</div>
       <h2 class="module-h2">Eight Days We'd Book Again</h2>
       <p class="module-sub">Tried, loved and booked direct with local operators. Tap one to reserve it with us on WhatsApp — we'll confirm dates and prices.</p>
