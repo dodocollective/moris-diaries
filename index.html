@@ -1527,7 +1527,7 @@
           <button type="submit" class="itin-submit">
             💬 Send to WhatsApp
           </button>
-          <div class="itin-form-fine">or email <a href="mailto:hello@thedodocollective.com">hello@thedodocollective.com</a></div>
+          <div class="itin-form-fine">or email <a href="mailto:hello@thedodocollective.com" data-track="email">hello@thedodocollective.com</a></div>
         </form>
       </div>
       </aside>
@@ -1721,13 +1721,13 @@
   </div>
 
   <div class="social-row">
-    <a href="https://www.thedodocollective.com" target="_blank" rel="noopener">thedodocollective.com</a>
+    <a href="https://www.thedodocollective.com" target="_blank" rel="noopener" data-track="dodo-collective">thedodocollective.com</a>
     <span class="social-dot">·</span>
-    <a href="https://www.instagram.com/mauritiusedits" target="_blank" rel="noopener">Instagram</a>
+    <a href="https://www.instagram.com/mauritiusedits" target="_blank" rel="noopener" data-track="instagram">Instagram</a>
     <span class="social-dot">·</span>
-    <a href="https://www.tiktok.com/@moris_diaries" target="_blank" rel="noopener">TikTok</a>
+    <a href="https://www.tiktok.com/@moris_diaries" target="_blank" rel="noopener" data-track="tiktok">TikTok</a>
     <span class="social-dot">·</span>
-    <a href="https://www.facebook.com/groups/2288064281977590" target="_blank" rel="noopener">Facebook Group</a>
+    <a href="https://www.facebook.com/groups/2288064281977590" target="_blank" rel="noopener" data-track="facebook-group">Facebook Group</a>
   </div>
 
   <div class="footer-divider">
@@ -1867,15 +1867,25 @@
       link.addEventListener('click', function () { toggleFlights(true, 'link'); });
     });
 
-    // Kiwi's flight widget is a cross-origin iframe, so clicks inside it can't be seen
-    // directly. The page losing focus to that iframe means someone started using it;
-    // log it once per page view.
+    // Kiwi's flight widget and the GYG availability widgets are cross-origin iframes, so
+    // clicks inside them can't be seen directly. The page losing focus to one of them
+    // means someone started using it; log it once per widget per page view.
     var flightsLogged = false;
+    var gygLogged = {};
     window.addEventListener('blur', function () {
       var el = document.activeElement;
-      if (!flightsLogged && el && el.tagName === 'IFRAME' && el.closest && el.closest('#flights')) {
+      if (!el || el.tagName !== 'IFRAME' || !el.closest) return;
+      if (!flightsLogged && el.closest('#flights')) {
         flightsLogged = true;
         window.trackEvent('flight_widget', 'Kiwi.com', { partner: 'Kiwi.com' });
+        return;
+      }
+      var gyg = el.closest('.gyg-live-card');
+      var tour = gyg && gyg.querySelector('[data-gyg-tour-id]');
+      var tourId = tour ? tour.getAttribute('data-gyg-tour-id') : null;
+      if (gyg && !gygLogged[tourId]) {
+        gygLogged[tourId] = true;
+        window.trackEvent('gyg_widget', tourId, { partner: 'GetYourGuide' });
       }
     });
 
@@ -1884,6 +1894,9 @@
     document.addEventListener('click', function (e) {
       var link = e.target.closest && e.target.closest('a[data-wa-source]');
       if (link && window.trackEvent) window.trackEvent('whatsapp_click', link.getAttribute('data-wa-source'));
+      // Email and social links — tagged with data-track.
+      var out = e.target.closest && e.target.closest('a[data-track]');
+      if (out && window.trackEvent) window.trackEvent('outbound_click', out.getAttribute('data-track'));
     });
   })();
 </script>
@@ -1899,6 +1912,7 @@
         var route = el.getAttribute('data-route');
         var match = document.querySelector('input[name="route"][value="' + route.replace(/"/g, '\\"') + '"]');
         if (match) match.checked = true;
+        if (window.trackEvent) window.trackEvent('route_select', route);
       });
     });
   }
@@ -1913,6 +1927,15 @@
 
   var tripForm = document.getElementById('tripForm');
   if (tripForm) {
+    // Send tapped with a required field empty: the browser blocks the submit, so log
+    // the attempt (whatsapp_submit_blocked, label = first empty field) to see drop-off.
+    var blockedLogged = false;
+    tripForm.addEventListener('invalid', function (e) {
+      if (blockedLogged) return;
+      blockedLogged = true;
+      setTimeout(function () { blockedLogged = false; }, 0);
+      if (window.trackEvent) window.trackEvent('whatsapp_submit_blocked', e.target.id || e.target.name || null);
+    }, true);
     tripForm.addEventListener('submit', function (e) {
       e.preventDefault();
       var name = document.getElementById('name').value;
