@@ -3008,10 +3008,11 @@
   // sends the request to WhatsApp. Events: section_view (car-rental, once), car_filter,
   // car_select, whatsapp_submit (label "Car rental"), whatsapp_submit_blocked
   // (label car-<field>), car_sheet_close (closed without sending).
+  // Requests go straight to AC Car Rental's WhatsApp, not ours.
   (function () {
     var SUPABASE_URL = "https://uyavmmgignbwbfhzwyjl.supabase.co";
     var SUPABASE_ANON_KEY = "sb_publishable_LIKG4Yp7PQ7oCHPzGepuBA_aBsHvsN8";
-    var WHATSAPP_NUMBER = "447507822532";
+    var WHATSAPP_NUMBER = "23057606389"; // AC Car Rental, +230 5760 6389
     var TYPE_LABEL = { hatch: 'Hatchback', sedan: 'Sedan', suv: 'SUV', mpv: '7-seater' };
     var ANY = { name: 'Any automatic — help me choose', type: null, any: true };
 
@@ -3126,13 +3127,15 @@
       e.preventDefault();
       var name = document.getElementById('rentalName').value.trim();
       var days = Math.round((new Date(to.value) - new Date(from.value)) / 86400000);
-      var msg = "Hi Moris Diaries! I'd like to reserve a rental car.\n" +
+      var msg = (current.any
+          ? "Hello AC Car Rental, we saw your cars on Moris Diaries.\n"
+          : "Hello AC Car Rental, we saw this car on Moris Diaries.\n") +
         "Car: " + (current.any ? "Not sure yet — please suggest an automatic" : current.name + " (automatic)") + "\n" +
         "Name: " + name + "\n" +
         "From: " + nice(from.value) + "\n" +
         "To: " + nice(to.value) + " (" + days + (days === 1 ? " day" : " days") + ")";
       sent = true;
-      track('whatsapp_submit', 'Car rental', { car: current.name, type: current.type, from: from.value, to: to.value, days: days });
+      track('whatsapp_submit', 'Car rental', { car: current.name, type: current.type, name: name, from: from.value, to: to.value, days: days, partner: 'AC Car Rental' });
       window.open('https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(msg), '_blank');
       sheet.close();
     });
