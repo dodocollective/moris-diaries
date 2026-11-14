@@ -223,6 +223,34 @@
     .ask-panel { position: sticky; top: 16px; }
     .after-picks { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: start; margin-bottom: 72px; }
   }
+
+  /* Car rental */
+  .rental-wrap { margin: 0 0 48px; scroll-margin-top: 16px; }
+  .rental-card { width: 230px; cursor: pointer; font: inherit; text-align: left; padding: 0; }
+  .rental-card:hover, .rental-card:focus-visible { transform: translateY(-4px); border-color: rgba(245,240,230,0.3); box-shadow: 0 24px 44px -16px rgba(0,0,0,0.6); outline: none; }
+  .rental-photo { width: 100%; aspect-ratio: 16 / 9; background: #fff; display: flex; align-items: center; justify-content: center; }
+  .rental-photo img { width: 92%; height: 92%; object-fit: contain; }
+  .rental-body { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 6px; }
+  .rental-name { font-family: 'Fraunces', serif; font-size: 16px; color: var(--sand); }
+  .rental-meta { display: flex; flex-wrap: wrap; gap: 6px; font-size: 11px; color: var(--sand-dim); }
+  .rental-meta span { padding: 2px 8px; border-radius: 20px; border: 1px solid rgba(245,240,230,0.16); }
+  .rental-meta .auto { border-color: rgba(61,122,107,0.7); color: #9fd8c6; }
+  .rental-cta { margin-top: 4px; padding: 8px 10px; border-radius: 6px; background: #25D366; color: #0E1A17; font-size: 12px; font-weight: 700; text-align: center; }
+  .rental-any { display: block; margin: 6px auto 0; background: none; border: none; color: var(--clay); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+
+  .rental-sheet { border: none; padding: 0; background: transparent; max-width: 440px; width: calc(100% - 24px); color: var(--sand); }
+  .rental-sheet::backdrop { background: rgba(5,10,9,0.7); backdrop-filter: blur(2px); }
+  .rental-sheet-inner { position: relative; background: var(--ink); border: 1px solid rgba(245,240,230,0.14); border-radius: 12px; padding: 20px; }
+  .rental-sheet-car { display: flex; gap: 14px; align-items: center; margin-bottom: 16px; padding-right: 28px; }
+  .rental-sheet-car img { width: 120px; aspect-ratio: 16 / 9; object-fit: contain; background: #fff; border-radius: 6px; flex: none; }
+  .rental-sheet-kicker { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--clay); }
+  .rental-sheet-title { font-family: 'Fraunces', serif; font-size: 20px; line-height: 1.2; margin-top: 2px; }
+  .rental-close { position: absolute; top: 10px; right: 10px; width: 32px; height: 32px; border-radius: 50%; border: none; background: rgba(245,240,230,0.1); color: var(--sand); font-size: 18px; cursor: pointer; }
+  .rental-sheet .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media (max-width: 639px) {
+    .rental-sheet { margin: auto 0 0; max-width: none; width: 100%; }
+    .rental-sheet-inner { border-radius: 14px 14px 0 0; padding-bottom: 26px; }
+  }
 </style>
 <style>
   :root {
@@ -1460,7 +1488,7 @@
       <a href="#where-to-stay">🏨 Where to Stay</a>
       <a href="#activities">🌊 Activities</a>
       <a href="#trip-concierge">🗺️ Itineraries</a>
-      <a href="#partner-banner-hertz">🚗 Car hire</a>
+      <a href="#car-rental">🚗 Car hire</a>
     </nav>
   </div>
 
@@ -1534,6 +1562,47 @@
     </div>
   </section>
 
+
+  <!-- Car rental (Supabase rental_cars) — every car is automatic; no prices. Tapping a car opens a short sheet
+       (name + dates) that sends the request to WhatsApp. -->
+  <section class="rental-wrap" id="car-rental" hidden>
+    <div class="module-eyebrow">✦ Car Rental</div>
+    <h2 class="module-h2">Pick a Car, We'll Hold It</h2>
+    <p class="module-sub">Every car is automatic. Tap one, tell us your dates and we'll confirm on WhatsApp.</p>
+
+    <div class="activities-filter" id="rentalFilter" role="tablist"></div>
+    <div class="stay-scroll rental-scroll" id="rentalCards"></div>
+    <button type="button" class="rental-any" id="rentalAny">Not sure which car? Tell us what you need →</button>
+  </section>
+
+  <dialog class="rental-sheet" id="rentalSheet" aria-labelledby="rentalSheetTitle">
+    <form method="dialog" class="rental-sheet-inner" id="rentalForm">
+      <button type="button" class="rental-close" id="rentalClose" aria-label="Close">×</button>
+      <div class="rental-sheet-car">
+        <img id="rentalSheetImg" alt="">
+        <div>
+          <div class="rental-sheet-kicker">Automatic · reserve on WhatsApp</div>
+          <div class="rental-sheet-title" id="rentalSheetTitle"></div>
+        </div>
+      </div>
+      <div class="field">
+        <label for="rentalName">Your name</label>
+        <input type="text" id="rentalName" required placeholder="Your name" autocomplete="name">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="rentalFrom">From</label>
+          <input type="date" id="rentalFrom" required>
+        </div>
+        <div class="field">
+          <label for="rentalTo">To</label>
+          <input type="date" id="rentalTo" required>
+        </div>
+      </div>
+      <button type="submit" class="itin-submit">💬 Reserve on WhatsApp</button>
+      <div class="itin-form-fine">No payment now — we'll confirm availability and price with you.</div>
+    </form>
+  </dialog>
 
   <div class="after-picks">
     <div id="trip-concierge">
@@ -2929,6 +2998,152 @@
         var head = document.querySelector('.picks-head');
         if (head) head.style.display = 'none';
       });
+  })();
+</script>
+
+<script>
+  // Car rental — the fleet from Supabase `rental_cars` (active rows, by sort_order; all
+  // automatic, no prices). A car without image_url shows a neutral silhouette of its
+  // body_type. The section stays hidden if the fleet can't load. Tapping a car opens a sheet (name + dates) that
+  // sends the request to WhatsApp. Events: section_view (car-rental, once), car_filter,
+  // car_select, whatsapp_submit (label "Car rental"), whatsapp_submit_blocked
+  // (label car-<field>), car_sheet_close (closed without sending).
+  (function () {
+    var SUPABASE_URL = "https://uyavmmgignbwbfhzwyjl.supabase.co";
+    var SUPABASE_ANON_KEY = "sb_publishable_LIKG4Yp7PQ7oCHPzGepuBA_aBsHvsN8";
+    var WHATSAPP_NUMBER = "447507822532";
+    var TYPE_LABEL = { hatch: 'Hatchback', sedan: 'Sedan', suv: 'SUV', mpv: '7-seater' };
+    var ANY = { name: 'Any automatic — help me choose', type: null, any: true };
+
+    var wrap = document.getElementById('car-rental');
+    var row = document.getElementById('rentalCards');
+    var filterBar = document.getElementById('rentalFilter');
+    var sheet = document.getElementById('rentalSheet');
+    var form = document.getElementById('rentalForm');
+    if (!wrap || !row || !sheet) return;
+
+    function track(name, label, meta) { if (window.trackEvent) window.trackEvent(name, label, meta); }
+    function photo(car) { return car.img || 'assets/cars/body-' + (car.type || 'suv') + '.svg'; }
+
+    function render(FLEET) {
+    FLEET.forEach(function (car, i) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'stay-card rental-card';
+      b.setAttribute('data-type', car.type);
+      b.innerHTML = '<div class="rental-photo"><img loading="lazy" alt=""></div>' +
+        '<div class="rental-body"><div class="rental-name"></div>' +
+        '<div class="rental-meta"><span class="auto">Automatic</span><span></span><span></span></div>' +
+        '<div class="rental-cta">Reserve on WhatsApp →</div></div>';
+      b.querySelector('img').src = photo(car);
+      b.querySelector('img').alt = car.name;
+      b.querySelector('.rental-name').textContent = car.name;
+      var meta = b.querySelectorAll('.rental-meta span');
+      meta[1].textContent = TYPE_LABEL[car.type];
+      meta[2].textContent = car.seats + ' seats';
+      b.addEventListener('click', function () { open(car, i + 1); });
+      row.appendChild(b);
+    });
+
+    // Filter tabs: All + each body style present.
+    var types = ['all'].concat(Object.keys(TYPE_LABEL).filter(function (t) {
+      return FLEET.some(function (c) { return c.type === t; });
+    }));
+    types.forEach(function (t) {
+      var tab = document.createElement('button');
+      tab.type = 'button';
+      tab.className = 'filter-tab' + (t === 'all' ? ' active' : '');
+      tab.textContent = t === 'all' ? 'All' : TYPE_LABEL[t];
+      tab.addEventListener('click', function () {
+        filterBar.querySelectorAll('.filter-tab').forEach(function (x) { x.classList.toggle('active', x === tab); });
+        row.querySelectorAll('.rental-card').forEach(function (c) { c.hidden = t !== 'all' && c.getAttribute('data-type') !== t; });
+        row.scrollLeft = 0;
+        track('car_filter', t);
+      });
+      filterBar.appendChild(tab);
+    });
+    wrap.hidden = false;
+    }
+
+    var params = new URLSearchParams({ select: 'name,body_type,seats,image_url', order: 'sort_order.asc' });
+    fetch(SUPABASE_URL + '/rest/v1/rental_cars?' + params.toString(), {
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY }
+    })
+      .then(function (res) {
+        if (!res.ok) throw new Error('rental_cars fetch failed: ' + res.status);
+        return res.json();
+      })
+      .then(function (rows) {
+        if (!rows.length) throw new Error('no cars');
+        render(rows.filter(function (r) { return TYPE_LABEL[r.body_type]; }).map(function (r) {
+          return { name: r.name, type: r.body_type, seats: r.seats || 5, img: r.image_url || null };
+        }));
+      })
+      .catch(function () { /* section stays hidden */ });
+
+    // Sheet
+    var current = null, sent = false;
+    var from = document.getElementById('rentalFrom');
+    var to = document.getElementById('rentalTo');
+    function iso(d) { return d.toISOString().slice(0, 10); }
+    function open(car, position) {
+      current = car; sent = false;
+      document.getElementById('rentalSheetTitle').textContent = car.name;
+      var img = document.getElementById('rentalSheetImg');
+      img.src = car.any ? 'assets/cars/body-suv.svg' : photo(car);
+      from.min = to.min = iso(new Date());
+      track('car_select', car.name, { type: car.type, position: position || null });
+      if (sheet.showModal) sheet.showModal(); else sheet.setAttribute('open', '');
+    }
+    document.getElementById('rentalAny').addEventListener('click', function () { open(ANY, null); });
+    // Closed without sending: × button, tap outside, or Escape.
+    function dismiss(how) {
+      if (!sent && current) track('car_sheet_close', current.name, { how: how });
+      sheet.close();
+    }
+    document.getElementById('rentalClose').addEventListener('click', function () { dismiss('button'); });
+    sheet.addEventListener('click', function (e) { if (e.target === sheet) dismiss('outside'); });
+    sheet.addEventListener('cancel', function (e) { e.preventDefault(); dismiss('escape'); });
+
+    from.addEventListener('change', function () { to.min = from.value || iso(new Date()); });
+    function checkDates() { to.setCustomValidity(from.value && to.value && to.value < from.value ? 'Return date must be after the pick-up date' : ''); }
+    from.addEventListener('change', checkDates);
+    to.addEventListener('change', checkDates);
+
+    var blocked = false;
+    form.addEventListener('invalid', function (e) {
+      if (blocked) return;
+      blocked = true;
+      setTimeout(function () { blocked = false; }, 0);
+      track('whatsapp_submit_blocked', 'car-' + (e.target.id || '').replace('rental', '').toLowerCase());
+    }, true);
+
+    function nice(v) {
+      var d = new Date(v + 'T00:00:00');
+      return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var name = document.getElementById('rentalName').value.trim();
+      var days = Math.round((new Date(to.value) - new Date(from.value)) / 86400000);
+      var msg = "Hi Moris Diaries! I'd like to reserve a rental car.\n" +
+        "Car: " + (current.any ? "Not sure yet — please suggest an automatic" : current.name + " (automatic)") + "\n" +
+        "Name: " + name + "\n" +
+        "From: " + nice(from.value) + "\n" +
+        "To: " + nice(to.value) + " (" + days + (days === 1 ? " day" : " days") + ")";
+      sent = true;
+      track('whatsapp_submit', 'Car rental', { car: current.name, type: current.type, from: from.value, to: to.value, days: days });
+      window.open('https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(msg), '_blank');
+      sheet.close();
+    });
+
+    // Seen: once per page view.
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (entries) {
+        if (entries[0].isIntersecting) { track('section_view', 'car-rental'); io.disconnect(); }
+      }, { threshold: 0.4 });
+      io.observe(wrap);
+    }
   })();
 </script>
 
