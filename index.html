@@ -1696,12 +1696,12 @@
   <div class="activities-wrap" id="activities">
     <div class="module-eyebrow">✦ Excursions &amp; Activities</div>
     <h2 class="module-h2">Book an Activity</h2>
-    <p class="module-sub">Book instantly with Mauritian operators, browse GetYourGuide's picks, or ask us on WhatsApp.</p>
+    <p class="module-sub">Reserve with Mauritian operators on WhatsApp, or browse GetYourGuide's picks.</p>
 
     <div id="gygTrending"></div>
 
-    <!-- Andeor — local operators with instant online booking (any activity whose url is an
-         andeor.travel link). Self-hides with none. -->
+    <!-- Andeor — local operators (any activity whose url is an andeor.travel link). While
+         ANDEOR_VIA_WHATSAPP is on, cards open WhatsApp; self-hides with none. -->
     <section class="andeor-shelf" id="andeorShelf" hidden>
       <div class="activities-filter activities-filter-type andeor-filter" id="andeorFilter" role="tablist" style="display:none;"></div>
       <div id="andeorRow"></div>
@@ -2061,7 +2061,12 @@
       return 'direct';
     }
 
-    var PROVIDER_LABEL = { andeor: 'Instant book', direct: 'Direct', viator: 'Viator', getyourguide: 'GetYourGuide' };
+    // Andeor affiliate attribution is broken for now, so Andeor cards open WhatsApp to us
+    // instead of the booking page. The affiliate links stay untouched in activities.url —
+    // set this to false to switch every Andeor card back to its affiliate link.
+    var ANDEOR_VIA_WHATSAPP = true;
+
+    var PROVIDER_LABEL = { andeor: ANDEOR_VIA_WHATSAPP ? 'WhatsApp' : 'Instant book', direct: 'Direct', viator: 'Viator', getyourguide: 'GetYourGuide' };
 
     // GetYourGuide activities get their own region explorer (below) rather than a row here.
     var ROWS = [
@@ -2072,6 +2077,10 @@
 
     function whatsappLink(activity) {
       var provider = providerName(activity);
+      if (ANDEOR_VIA_WHATSAPP && providerKind(activity) === 'andeor') {
+        return "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(
+          "Hi Moris Diaries! I'd like to book: " + activity.title + (provider ? " (" + provider + ")" : "") + ".");
+      }
       var number = cleanPhone(activity.contact_phone) ||
         cleanPhone(activity.providers && activity.providers.phone) ||
         WHATSAPP_NUMBER;
@@ -2089,8 +2098,9 @@
     }
 
     function buildCard(activity) {
-      var canBookDirect = !!(activity.external_booking && activity.url);
       var kind = providerKind(activity);
+      var canBookDirect = !!(activity.external_booking && activity.url) &&
+        !(ANDEOR_VIA_WHATSAPP && kind === 'andeor');
 
       var a = document.createElement('a');
       a.className = 'activity-card';
@@ -2102,6 +2112,7 @@
         if (window.trackEvent) {
           window.trackEvent('activity_click', activity.title, {
             type: canBookDirect ? 'book' : 'enquire',
+            channel: canBookDirect ? 'link' : 'whatsapp',
             category: activity.category || null,
             provider: kind
           });
@@ -2361,8 +2372,9 @@
       var count = Object.keys(operators).length;
       var row = buildRow({
         key: 'andeor',
-        title: 'Book Instantly with Local Operators',
-        sub: items.length + ' experiences from ' + count + ' Mauritian operators · confirmed online'
+        title: ANDEOR_VIA_WHATSAPP ? 'Book with Local Operators' : 'Book Instantly with Local Operators',
+        sub: items.length + ' experiences from ' + count + ' Mauritian operators · ' +
+          (ANDEOR_VIA_WHATSAPP ? 'reserve on WhatsApp' : 'confirmed online')
       }, items);
       rowWrap.appendChild(row);
       shelf.hidden = false;
