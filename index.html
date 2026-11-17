@@ -251,6 +251,32 @@
     .rental-sheet { margin: auto 0 0; max-width: none; width: 100%; }
     .rental-sheet-inner { border-radius: 14px 14px 0 0; padding-bottom: 26px; }
   }
+
+  /* Travel deals */
+  .deals-wrap { margin: -28px 0 48px; }
+  .deals-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin: 0 2px 10px; }
+  .deals-head b { font-family: 'Fraunces', serif; font-weight: 500; font-size: 17px; color: var(--sand); }
+  .deals-head span { font-size: 12px; color: var(--stone); }
+  .deals-row { display: flex; gap: 10px; overflow-x: auto; padding: 2px 2px 8px; scroll-snap-type: x proximity; }
+  .deals-row::-webkit-scrollbar { height: 6px; }
+  .deals-row::-webkit-scrollbar-thumb { background: rgba(245,240,230,0.15); border-radius: 4px; }
+  .deal {
+    flex: 0 0 auto; width: 250px; scroll-snap-align: start;
+    display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; align-items: start;
+    padding: 14px; border-radius: 8px; text-decoration: none; color: var(--sand);
+    background: rgba(245,240,230,0.04); border: 1px solid rgba(245,240,230,0.12);
+    transition: border-color 0.2s ease, transform 0.2s ease;
+  }
+  .deal:hover, .deal:focus-visible { border-color: rgba(201,98,45,0.6); transform: translateY(-2px); outline: none; }
+  .deal-icon { grid-row: span 3; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; background: rgba(245,240,230,0.08); }
+  .deal-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .deal-brand { font-weight: 700; font-size: 14px; }
+  .deal-off { font-size: 11px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: #0E1A17; background: var(--clay); padding: 2px 7px; border-radius: 4px; }
+  .deal-desc { font-size: 12px; line-height: 1.4; color: var(--sand-dim); }
+  .deal-foot { display: flex; justify-content: space-between; gap: 8px; font-size: 11px; color: var(--stone); margin-top: 4px; }
+  .deal-foot b { color: var(--clay); font-weight: 600; }
+  .deals-note { font-size: 11px; color: var(--stone); margin: 4px 2px 0; }
+  @media (min-width: 960px) { .deal { width: 280px; } }
 </style>
 <style>
   :root {
@@ -1693,6 +1719,14 @@
     </button>
     <div class="flights-widget" id="flightsWidget" hidden></div>
   </div>
+
+  <!-- Travel deals — Travelpayouts promo links from Supabase `web_deals`; each shows only
+       between its starts_on and ends_on, so expired codes drop off by themselves. -->
+  <section class="deals-wrap" id="deals" hidden>
+    <div class="deals-head"><b>Before you fly</b><span>Partner discounts for your trip</span></div>
+    <div class="deals-row" id="dealsRow"></div>
+    <p class="deals-note">Partner links — we may earn a small commission, at no extra cost to you.</p>
+  </section>
 
   <div class="stay-wrap" id="where-to-stay" style="display:none;">
     <div class="module-eyebrow">✦ Where to Stay</div>
@@ -3158,6 +3192,72 @@
       }, { threshold: 0.4 });
       io.observe(wrap);
     }
+  })();
+</script>
+
+<script>
+  // Travel deals — Supabase `web_deals` (active, starts_on <= today <= ends_on, by
+  // sort_order). Each card is the partner's promo link. Events: section_view (deals, once),
+  // deal_click (label = brand, with discount, category, position).
+  (function () {
+    var SUPABASE_URL = "https://uyavmmgignbwbfhzwyjl.supabase.co";
+    var SUPABASE_ANON_KEY = "sb_publishable_LIKG4Yp7PQ7oCHPzGepuBA_aBsHvsN8";
+    var wrap = document.getElementById('deals');
+    var row = document.getElementById('dealsRow');
+    if (!wrap || !row) return;
+
+    function track(name, label, meta) { if (window.trackEvent) window.trackEvent(name, label, meta); }
+    var d = new Date();
+    var today = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+
+    function until(v) {
+      return 'Until ' + new Date(v + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    }
+
+    var params = new URLSearchParams({
+      select: 'brand,category,icon,discount_label,description,url,ends_on',
+      starts_on: 'lte.' + today,
+      ends_on: 'gte.' + today,
+      order: 'sort_order.asc'
+    });
+    fetch(SUPABASE_URL + '/rest/v1/web_deals?' + params.toString(), {
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY }
+    })
+      .then(function (res) {
+        if (!res.ok) throw new Error('web_deals fetch failed: ' + res.status);
+        return res.json();
+      })
+      .then(function (deals) {
+        if (!deals.length) return;
+        deals.forEach(function (deal, i) {
+          var a = document.createElement('a');
+          a.className = 'deal';
+          a.href = deal.url;
+          a.target = '_blank';
+          a.rel = 'noopener sponsored';
+          a.innerHTML = '<span class="deal-icon" aria-hidden="true"></span>' +
+            '<span class="deal-top"><span class="deal-brand"></span><span class="deal-off"></span></span>' +
+            '<span class="deal-desc"></span>' +
+            '<span class="deal-foot"><span class="deal-when"></span><b>Get the deal →</b></span>';
+          a.querySelector('.deal-icon').textContent = deal.icon || '🏷️';
+          a.querySelector('.deal-brand').textContent = deal.brand;
+          a.querySelector('.deal-off').textContent = deal.discount_label;
+          a.querySelector('.deal-desc').textContent = (deal.category ? deal.category + ' — ' : '') + (deal.description || '');
+          a.querySelector('.deal-when').textContent = until(deal.ends_on);
+          a.addEventListener('click', function () {
+            track('deal_click', deal.brand, { discount: deal.discount_label, category: deal.category || null, position: i + 1 });
+          });
+          row.appendChild(a);
+        });
+        wrap.hidden = false;
+        if ('IntersectionObserver' in window) {
+          var io = new IntersectionObserver(function (entries) {
+            if (entries[0].isIntersecting) { track('section_view', 'deals', { count: deals.length }); io.disconnect(); }
+          }, { threshold: 0.5 });
+          io.observe(wrap);
+        }
+      })
+      .catch(function () { /* strip stays hidden */ });
   })();
 </script>
 
