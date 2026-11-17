@@ -909,6 +909,7 @@
     white-space: nowrap;
   }
   .provider-tag.tag-direct { background: rgba(61,122,107,0.2); color: var(--lagoon); }
+  .provider-tag.tag-andeor { background: rgba(61,122,107,0.28); color: #9fd8c6; }
   .provider-tag.tag-viator { background: rgba(201,98,45,0.18); color: var(--clay); }
   .provider-tag.tag-getyourguide { background: rgba(245,240,230,0.08); color: rgba(245,240,230,0.6); border: 1px dashed rgba(245,240,230,0.3); }
 
@@ -1222,36 +1223,10 @@
 
   .explorer { display: grid; grid-template-columns: 1fr; gap: 24px; margin-bottom: 16px; }
 
-  .map-card {
-    background: rgba(245,240,230,0.03); border: 1px solid rgba(245,240,230,0.1);
-    border-radius: 10px; padding: 22px;
-  }
-  .map-card .map-sub { font-size: 11px; color: var(--stone); margin: 4px 0 14px; }
 
-  .island-map { display: none; width: 100%; }
 
-  .pin circle.dot { fill: var(--clay); cursor: pointer; }
-  .pin circle.pulse { fill: var(--clay); animation: pin-pulse 2.4s ease-out infinite; pointer-events: none; }
-  .pin text { fill: var(--sand-dim); font-family: 'Inter', sans-serif; font-size: 12px; cursor: pointer; user-select: none; }
-  .pin.active circle.dot { fill: var(--sand); stroke: var(--clay); stroke-width: 2.5; r: 9; }
-  .pin.active text { fill: var(--sand); font-weight: 600; }
-  .pin:focus-visible circle.dot { outline: 2px solid var(--clay); outline-offset: 3px; }
-  @keyframes pin-pulse { 0%, 100% { transform: scale(1); opacity: 0.55; } 50% { transform: scale(1.8); opacity: 0; } }
 
-  .chip-row { display: flex; gap: 9px; overflow-x: auto; padding-bottom: 4px; }
-  .region-chip {
-    flex: 0 0 auto; display: flex; align-items: center; gap: 7px;
-    padding: 9px 15px; border-radius: 22px; border: 1px solid rgba(245,240,230,0.22);
-    font-size: 11.5px; color: var(--sand-dim); cursor: pointer; background: transparent;
-    font-family: 'Inter', sans-serif;
-  }
-  .region-chip .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--clay); }
-  .region-chip.active { background: var(--clay); color: var(--ink); border-color: var(--clay); font-weight: 700; }
-  .region-chip.active .dot { background: var(--ink); }
-  .region-chip:focus-visible { outline: 2px solid var(--clay); outline-offset: 2px; }
 
-  .map-legend { display: flex; align-items: center; gap: 8px; font-size: 10.5px; color: var(--stone); margin-top: 14px; }
-  .map-legend .legend-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--clay); }
 
   .feed-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
   .feed-head .region-name { font-family: 'Fraunces', serif; font-weight: 500; font-size: 18px; }
@@ -1284,11 +1259,10 @@
     .feed-grid { grid-template-columns: repeat(3, minmax(0,1fr)); }
   }
 
-  @media (min-width: 900px) {
-    .explorer { grid-template-columns: 420px 1fr; }
-    .island-map { display: block; }
-    .chip-row { display: none; }
-  }
+  .andeor-shelf { margin-bottom: 36px; }
+  .andeor-filter { justify-content: flex-start; flex-wrap: nowrap; overflow-x: auto; margin: 2px 0 12px; scrollbar-width: none; }
+  .andeor-filter::-webkit-scrollbar { display: none; }
+  .andeor-filter .filter-tab { flex: 0 0 auto; }
 
   @media (min-width: 1024px) {
     .feed-grid { grid-template-columns: repeat(3, minmax(0,1fr)); gap: 18px; }
@@ -1742,7 +1716,7 @@
   <div class="activities-wrap" id="activities">
     <div class="module-eyebrow">✦ Excursions &amp; Activities</div>
     <h2 class="module-h2">Book an Activity</h2>
-    <p class="module-sub">Curated with GetYourGuide, or explore the island to find it — every activity is pinned to where it actually happens.</p>
+    <p class="module-sub">Book instantly with Mauritian operators, browse GetYourGuide's picks, or ask us on WhatsApp.</p>
 
     <!-- Live availability — GetYourGuide's calendar widget for activities flagged
          show_availability_widget in Supabase; self-hides with none -->
@@ -1754,30 +1728,25 @@
       <div class="gyg-live-row" id="gygLiveRow"></div>
     </div>
 
-    <!-- GetYourGuide region explorer — self-hides if there are no GetYourGuide activities -->
+    <div id="gygTrending"></div>
+
+    <!-- Andeor — local operators with instant online booking (any activity whose url is an
+         andeor.travel link). Self-hides with none. -->
+    <section class="andeor-shelf" id="andeorShelf" hidden>
+      <div class="activities-filter activities-filter-type andeor-filter" id="andeorFilter" role="tablist" style="display:none;"></div>
+      <div id="andeorRow"></div>
+    </section>
+
+    <!-- GetYourGuide collections — self-hides if there are no GetYourGuide activities -->
     <div id="gygExplorer" style="display:none;">
-      <div id="gygTrending"></div>
 
       <div class="collections" id="gygCollections"></div>
 
       <div class="explorer">
-        <div class="map-card">
-          <span class="eyebrow">Explore By Region</span>
-          <div class="map-sub">Every pin is a real place from the app — pick one to filter.</div>
-          <svg class="island-map" id="islandMap" viewBox="0 0 400 500">
-            <path d="M200,30 C260,20 320,60 340,120 C360,180 350,230 380,280 C400,330 370,380 330,410 C290,450 240,470 190,460 C140,450 100,420 80,370 C60,320 70,270 50,220 C30,170 50,110 90,80 C130,50 160,40 200,30 Z"
-              fill="rgba(61,122,107,0.08)" stroke="rgba(245,240,230,0.18)" stroke-width="1.5"/>
-          </svg>
-          <div class="chip-row" id="regionChips"></div>
-          <div class="map-legend"><span class="legend-dot"></span> GetYourGuide</div>
+        <div class="feed-head">
+          <span class="region-name" id="regionName"></span><span class="region-sub" id="regionSub"></span>
         </div>
-
-        <div>
-          <div class="feed-head">
-            <span class="region-name" id="regionName"></span><span class="region-sub" id="regionSub"></span>
-          </div>
-          <div class="feed-grid" id="gygFeed"></div>
-        </div>
+        <div class="feed-grid" id="gygFeed"></div>
       </div>
 
       <a href="#more-ways-to-book" class="direct-link">Prefer Direct or Viator? →</a>
@@ -2124,17 +2093,18 @@
     // network gets its own row; everything else (WhatsApp enquiry, or an operator's own
     // booking link) reads as "Direct". Add a row config below if a new network joins.
     function providerKind(activity) {
+      if (/andeor\.travel/i.test(activity.url || '')) return 'andeor';
       var name = (providerName(activity) || '').toLowerCase();
       if (name.indexOf('viator') !== -1) return 'viator';
       if (name.indexOf('getyourguide') !== -1) return 'getyourguide';
       return 'direct';
     }
 
-    var PROVIDER_LABEL = { direct: 'Direct', viator: 'Viator', getyourguide: 'GetYourGuide' };
+    var PROVIDER_LABEL = { andeor: 'Instant book', direct: 'Direct', viator: 'Viator', getyourguide: 'GetYourGuide' };
 
     // GetYourGuide activities get their own region explorer (below) rather than a row here.
     var ROWS = [
-      { key: 'trending', title: 'Trending Now', filter: function (a) { return a.is_trending && providerKind(a) !== 'getyourguide'; } },
+      { key: 'trending', title: 'Trending Now', filter: function (a) { return a.is_trending && providerKind(a) !== 'getyourguide' && providerKind(a) !== 'andeor'; } },
       { key: 'direct', title: 'Book Direct', tabLabel: 'Direct', sub: 'Straight to the operator, no middleman', filter: function (a) { return providerKind(a) === 'direct'; } },
       { key: 'viator', title: 'Viator Partner Activities', tabLabel: 'Viator', filter: function (a) { return providerKind(a) === 'viator'; } }
     ];
@@ -2376,19 +2346,7 @@
       rowsWrap.appendChild(p);
     }
 
-    // GetYourGuide activities get their own region explorer rather than a row: a
-    // collection-tile switcher (type) crossed with an island map (where), built from
-    // each activity's real point of interest instead of a generic category tab.
-    var REGION_CLUSTERS = [
-      { id: 'chamouny', name: 'Chamouny', sub: 'Valle Adventure Park & around', x: 140, y: 310, pois: ['Chamouny'] },
-      { id: 'tamarin', name: 'Tamarin', sub: 'West coast', x: 75, y: 270, pois: ['Tamarin Public Beach'] },
-      { id: 'grandbaie', name: 'Grand Baie & North', sub: 'Grand Baie · Calodyne · Pamplemousses', x: 225, y: 75, pois: ['Grand Baie Beach', 'Calodyne', "L'Aventure du Sucre Museum"] },
-      { id: 'bellemare', name: 'Belle Mare & East', sub: "Belle Mare · Trou d'Eau Douce · Grand River SE", x: 335, y: 230, pois: ['Belle Mare Beach', "Trou d'Eau Douce", 'Grand River South East'] },
-      { id: 'mahebourg', name: 'Mahébourg & South East', sub: 'Mahébourg · Blue Bay · Île aux Cerfs', x: 300, y: 380, pois: ['Mahebourg', 'Blue Bay Beach', 'Ile aux Cerfs'] },
-      { id: 'belombre', name: 'Bel Ombre & South', sub: 'Bel Ombre · Rivière des Anguilles', x: 175, y: 430, pois: ['Bel Ombre Nature Reserve', 'C Beach Club', 'Union Ducray, Rivière des Anguilles', 'Tamarind Falls'] },
-      { id: 'lemorne', name: 'Le Morne & West', sub: 'Le Morne · Amber Island · Pointe aux Sables', x: 70, y: 340, pois: ['Le Morne Brabant', 'Amber Island', 'World of Seashells Museum'] }
-    ];
-
+    // GetYourGuide activities get their own collection-tile explorer rather than a row.
     var COLLECTIONS = [
       { id: 'all', label: 'GetYourGuide Picks', tint: '201,98,45',
         icon: '<circle cx="12" cy="12" r="9"/><path d="M15 9l-2 6-6 2 2-6 6-2z"/>',
@@ -2403,24 +2361,6 @@
         icon: '<path d="M12 3C7 3 3 8 3 12h18c0-4-4-9-9-9z"/><path d="M12 12v7a2 2 0 0 1-2 2"/><path d="M12 3v2"/>',
         filter: function (a) { return a.category === 'Food' || a.category === 'Culture'; } }
     ];
-
-    function poiName(activity) {
-      return activity.posts && activity.posts.points_of_interest && activity.posts.points_of_interest.name;
-    }
-
-    function regionFor(activity) {
-      var name = poiName(activity);
-      for (var i = 0; i < REGION_CLUSTERS.length; i++) {
-        if (REGION_CLUSTERS[i].pois.indexOf(name) !== -1) return REGION_CLUSTERS[i];
-      }
-      return null;
-    }
-
-    function svgEl(tag, attrs) {
-      var e = document.createElementNS('http://www.w3.org/2000/svg', tag);
-      for (var k in attrs) e.setAttribute(k, attrs[k]);
-      return e;
-    }
 
     // With GetYourGuide's explorer above it, the Direct/Viator rows start collapsed behind
     // a button. The cards stay in the page (hidden, not removed), so their click tracking
@@ -2445,16 +2385,70 @@
       });
     }
 
+    // Andeor shelf — every andeor.travel activity in one row near the top of the section,
+    // with type tabs when there's more than one type. Events: section_view (andeor, once),
+    // activity_filter (andeor-<type>); card clicks log activity_click with provider "andeor".
+    function buildAndeorShelf(activities) {
+      var shelf = document.getElementById('andeorShelf');
+      var rowWrap = document.getElementById('andeorRow');
+      var bar = document.getElementById('andeorFilter');
+      if (!shelf || !rowWrap) return;
+      var items = activities.filter(function (a) { return providerKind(a) === 'andeor'; });
+      if (!items.length) return;
+      var operators = {};
+      items.forEach(function (a) { var n = providerName(a); if (n) operators[n] = 1; });
+      var count = Object.keys(operators).length;
+      var row = buildRow({
+        key: 'andeor',
+        title: 'Book Instantly with Local Operators',
+        sub: items.length + ' experiences from ' + count + ' Mauritian operators · confirmed online'
+      }, items);
+      rowWrap.appendChild(row);
+      shelf.hidden = false;
+
+      var types = [];
+      items.forEach(function (a) { if (a.category && types.indexOf(a.category) === -1) types.push(a.category); });
+      types.sort();
+      if (bar && types.length > 1) {
+        row.insertBefore(bar, row.children[1]); // tabs sit under the shelf title
+        bar.style.display = 'flex';
+        ['all'].concat(types).forEach(function (t) {
+          var tab = document.createElement('button');
+          tab.type = 'button';
+          tab.className = 'filter-tab' + (t === 'all' ? ' active' : '');
+          tab.textContent = t === 'all' ? 'All' : t;
+          tab.addEventListener('click', function () {
+            bar.querySelectorAll('.filter-tab').forEach(function (x) { x.classList.toggle('active', x === tab); });
+            row.querySelectorAll('.activity-card').forEach(function (c) {
+              c.style.display = t === 'all' || c.getAttribute('data-category') === t ? '' : 'none';
+            });
+            var scroll = row.querySelector('.activity-row-scroll');
+            if (scroll) { scroll.scrollLeft = 0; scroll.dispatchEvent(new Event('scroll')); }
+            if (window.trackEvent) window.trackEvent('activity_filter', 'andeor-' + t);
+          });
+          bar.appendChild(tab);
+        });
+      }
+
+      if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (entries) {
+          if (entries[0].isIntersecting) {
+            if (window.trackEvent) window.trackEvent('section_view', 'andeor', { count: items.length });
+            io.disconnect();
+          }
+        }, { threshold: 0.4 });
+        io.observe(shelf);
+      }
+    }
+
     function buildGygExplorer(activities) {
       var gygExplorer = document.getElementById('gygExplorer');
       var gygCollections = document.getElementById('gygCollections');
-      var islandMap = document.getElementById('islandMap');
-      var regionChips = document.getElementById('regionChips');
       var regionNameEl = document.getElementById('regionName');
       var regionSubEl = document.getElementById('regionSub');
       var gygFeed = document.getElementById('gygFeed');
       var moreWaysHead = document.getElementById('moreWaysHead');
-      if (!gygExplorer || !islandMap) return;
+      if (!gygExplorer || !gygFeed) return;
 
       var gygActivities = activities.filter(function (a) { return providerKind(a) === 'getyourguide'; });
       if (moreWaysHead && gygActivities.length) moreWaysHead.style.display = 'block';
@@ -2475,7 +2469,6 @@
       }
 
       var currentCollection = 'all';
-      var currentRegion = null;
 
       function collectionItems(collectionId) {
         var collection = COLLECTIONS.filter(function (c) { return c.id === collectionId; })[0];
@@ -2512,64 +2505,12 @@
         gygCollections.appendChild(row);
       }
 
-      function renderMap() {
-        islandMap.querySelectorAll('.pin').forEach(function (p) { p.remove(); });
-        regionChips.innerHTML = '';
-
-        var items = collectionItems(currentCollection);
-        var counts = {};
-        items.forEach(function (a) {
-          var region = regionFor(a);
-          if (region) counts[region.id] = (counts[region.id] || 0) + 1;
-        });
-
-        var activeClusters = REGION_CLUSTERS.filter(function (r) { return counts[r.id]; });
-        if (!activeClusters.length) { currentRegion = null; return; }
-        if (!currentRegion || !counts[currentRegion]) {
-          currentRegion = activeClusters.reduce(function (best, r) {
-            return counts[r.id] > counts[best.id] ? r : best;
-          }, activeClusters[0]).id;
-        }
-
-        activeClusters.forEach(function (region) {
-          var g = svgEl('g', {
-            class: 'pin' + (region.id === currentRegion ? ' active' : ''),
-            tabindex: '0', role: 'button', 'aria-label': region.name
-          });
-          g.appendChild(svgEl('circle', { class: 'pulse', cx: region.x, cy: region.y, r: 6 }));
-          g.appendChild(svgEl('circle', { class: 'dot', cx: region.x, cy: region.y, r: 6 }));
-          var label = svgEl('text', { x: region.x + 12, y: region.y - 8 });
-          label.textContent = region.name + ' · ' + counts[region.id];
-          g.appendChild(label);
-          g.addEventListener('click', function () { selectRegion(region.id); });
-          g.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectRegion(region.id); }
-          });
-          islandMap.appendChild(g);
-
-          var chip = document.createElement('button');
-          chip.type = 'button';
-          chip.className = 'region-chip' + (region.id === currentRegion ? ' active' : '');
-          chip.innerHTML = '<span class="dot"></span>' + region.name + ' · ' + counts[region.id];
-          chip.addEventListener('click', function () { selectRegion(region.id); });
-          regionChips.appendChild(chip);
-        });
-      }
-
       function renderFeed() {
-        var region = REGION_CLUSTERS.filter(function (r) { return r.id === currentRegion; })[0];
+        var collection = COLLECTIONS.filter(function (c) { return c.id === currentCollection; })[0];
         gygFeed.innerHTML = '';
-        if (!region) {
-          regionNameEl.textContent = 'No activities in this collection yet';
-          regionSubEl.textContent = '';
-          return;
-        }
-        regionNameEl.textContent = region.name;
-        regionSubEl.textContent = region.sub;
-        var items = collectionItems(currentCollection).filter(function (a) {
-          var r = regionFor(a);
-          return r && r.id === currentRegion;
-        });
+        var items = collectionItems(currentCollection);
+        regionNameEl.textContent = collection.id === 'all' ? 'GetYourGuide' : collection.label;
+        regionSubEl.textContent = items.length + (items.length === 1 ? ' experience' : ' experiences');
         items.forEach(function (a) { gygFeed.appendChild(buildCard(a)); });
 
         // Show the first FEED_LIMIT cards (4 on mobile, 6 on desktop); the rest stay in the
@@ -2583,11 +2524,11 @@
           more.type = 'button';
           more.id = 'gygFeedMore';
           more.className = 'more-ways-toggle';
-          more.textContent = 'Show all ' + items.length + ' in ' + region.name;
+          more.textContent = 'Show all ' + items.length;
           more.addEventListener('click', function () {
             gygFeed.classList.add('show-all');
             more.remove();
-            if (window.trackEvent) window.trackEvent('section_expand', 'gyg-feed', { region: region.id });
+            if (window.trackEvent) window.trackEvent('section_expand', 'gyg-feed', { collection: currentCollection });
           });
           gygFeed.parentNode.insertBefore(more, gygFeed.nextSibling);
         }
@@ -2595,20 +2536,12 @@
 
       function selectCollection(id) {
         currentCollection = id;
-        currentRegion = null; // recompute the default region for the new collection
         renderCollections();
-        renderMap();
         renderFeed();
-      }
-
-      function selectRegion(id) {
-        currentRegion = id;
-        renderMap();
-        renderFeed();
+        if (window.trackEvent) window.trackEvent('activity_filter', 'gyg-' + id);
       }
 
       renderCollections();
-      renderMap();
       renderFeed();
     }
 
@@ -2705,7 +2638,7 @@
         var typeOptions = [];
         var seenTypes = {};
         activities.forEach(function (a) {
-          if (a.category && !seenTypes[a.category] && providerKind(a) !== 'getyourguide') {
+          if (a.category && !seenTypes[a.category] && providerKind(a) !== 'getyourguide' && providerKind(a) !== 'andeor') {
             seenTypes[a.category] = true;
             typeOptions.push({ key: a.category, label: a.category });
           }
@@ -2719,6 +2652,7 @@
           function (key) { currentType = key; applyFilters(); }
         );
 
+        buildAndeorShelf(activities);
         buildGygExplorer(activities);
       })
       .catch(function () {
