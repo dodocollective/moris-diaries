@@ -1194,8 +1194,11 @@
   .sa-fine a { color: inherit; }
 
   @media (min-width: 960px) {
-    .sa-head { grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 18px 40px; }
-    .sa-head .sa-count { grid-column: 1 / -1; }
+    .sa-head { grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px 40px; }
+    .sa-head > div:first-child { grid-column: 1 / -1; }
+    .sa-head .sa-count { grid-row: 2; grid-column: 1; }
+    .sa-head .sa-modes { grid-row: 2; grid-column: 2; }
+    .sa-sentence { font-size: clamp(30px, 3.2vw, 41px); }
     .sa-atlas { display: grid; grid-template-columns: 232px minmax(0, 1fr) 232px; gap: 0 12px; align-items: stretch; }
     .sa-leaders { display: block; position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; }
     .sa-leaders path { fill: none; stroke: var(--sand); stroke-opacity: 0.22; stroke-width: 1; }
@@ -1574,6 +1577,55 @@
     .footer-name, .footer-sub, footer .coords { margin: 0; }
     footer .coords { margin-left: 6px; }
   }
+
+  /* ================= TEXT MOTION — "the diary writes itself" =================
+     The script at the end of the page adds .ink (waiting) and .ink-on (writing). Without it,
+     or with reduced motion, every word simply shows. */
+  .ink-u { position: relative; display: inline-block; text-decoration: none; white-space: nowrap; }
+  .ink-u::after {
+    content: ''; position: absolute; left: -2%; right: -2%; bottom: -0.2em; height: 0.3em; pointer-events: none;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 14' preserveAspectRatio='none'%3E%3Cpath d='M3 9 Q27 2 52 8 T101 8 T149 7 T197 5' fill='none' stroke='%23C9622D' stroke-width='3.4' stroke-linecap='round'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat;
+  }
+  .module-h2:has(.ink-u) { margin-bottom: 14px; }
+  .after-picks #trip-concierge .module-h2:has(.ink-u) { margin-bottom: 11px; }
+  .ink-w { display: inline-block; white-space: nowrap; }
+  .ink-c { display: inline-block; }
+  .ink-e { display: inline-block; }
+  .ink-e i { display: inline-block; font-style: normal; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ink .ink-c { opacity: 0; }
+    .ink-on .ink-c { animation: ink-c 0.46s cubic-bezier(.2,.9,.3,1.25) both; animation-delay: calc(var(--i) * var(--step, 34ms)); }
+    .ink .ink-u::after { clip-path: inset(0 100% 0 0); }
+    .ink-on .ink-u::after { animation: ink-wipe 0.6s cubic-bezier(.6,0,.2,1) both; animation-delay: var(--end, 0.6s); }
+    .ink .ink-e { clip-path: inset(-40% 100% -40% 0); }
+    .ink-on .ink-e { animation: ink-label 0.7s cubic-bezier(.5,0,.2,1) both; }
+    .ink-on .ink-e i { animation: ink-star 0.8s cubic-bezier(.2,.8,.3,1.2) both; }
+    .ink.ink-p { opacity: 0; }
+    .ink-p.ink-on { animation: ink-rise 0.7s cubic-bezier(.2,.7,.2,1) both; animation-delay: var(--wait, 0.35s); }
+    .ink.ink-list li, .ink.ink-list .meta, .ink.ink-list .swap-note { opacity: 0; }
+    .ink-list.ink-on li, .ink-list.ink-on .meta, .ink-list.ink-on .swap-note { animation: ink-side 0.55s cubic-bezier(.2,.7,.2,1) both; animation-delay: calc(var(--n, 0) * 130ms + 0.5s); }
+    .ink.ink-wave path { stroke-dasharray: 1; stroke-dashoffset: 1; }
+    .ink-wave.ink-on path { animation: ink-draw 1.8s cubic-bezier(.5,0,.2,1) both; }
+    .sa-sentence select { transition: color 0.26s ease; }
+    .sa-sentence select.ink-fade { color: transparent; }
+    .ink-flap { display: inline-block; overflow: hidden; vertical-align: bottom; text-align: center; white-space: pre; }
+    .ink-flap.spin { color: var(--clay); }
+
+    /* Titles that arrive with live data: they rise as they scroll in, where the browser can. */
+    @supports (animation-timeline: view()) {
+      .activity-row-title, .feed-head .region-name, #moreWaysHead, .deals-head b, .sa-ask p, .itin-form-head {
+        animation: ink-rise linear both; animation-timeline: view(); animation-range: entry 0% entry 180%;
+      }
+    }
+  }
+  @keyframes ink-c { from { opacity: 0; transform: translateY(0.34em) rotate(var(--r, 8deg)) scale(0.7); } to { opacity: 1; transform: none; } }
+  @keyframes ink-wipe { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+  @keyframes ink-label { from { clip-path: inset(-40% 100% -40% 0); } to { clip-path: inset(-40% -6% -40% 0); } }
+  @keyframes ink-star { from { transform: rotate(-200deg) scale(0.2); } to { transform: none; } }
+  @keyframes ink-rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+  @keyframes ink-side { from { opacity: 0; transform: translateX(-16px); } to { opacity: 1; transform: none; } }
+  @keyframes ink-draw { from { stroke-dasharray: 1; stroke-dashoffset: 1; } to { stroke-dasharray: 1; stroke-dashoffset: 0; } }
 </style>
 <!-- Cloudflare Web Analytics -->
 <script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "32a056f9e6b5416791cd6497825e4465"}'></script>
@@ -1613,9 +1665,45 @@
       <div class="stamp"><img src="assets/stamp.jpg" alt="Moris Diaries logo" width="84" height="84"></div>
       <div>
         <h1>Moris Diaries</h1>
-        <p class="tagline">Built only for the island — <em>not another travel app</em></p>
+        <p class="tagline">Built only for the island — <em class="ink-u">not another travel app</em></p>
       </div>
     </div>
+    <script>
+      // The name writes itself in as the page opens (see TEXT MOTION in the styles).
+      (function () {
+        var calm = !window.matchMedia || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        // Wraps each letter in a span (kept in unbreakable words); the heading keeps its words for screen readers.
+        window.inkSplit = function (node) {
+          var i = 0, text = node.textContent.replace(/\s+/g, ' ').trim();
+          (function walk(n) {
+            [].slice.call(n.childNodes).forEach(function (c) {
+              if (c.nodeType !== 3) { walk(c); return; }
+              var f = document.createDocumentFragment();
+              c.nodeValue.split(/(\s+)/).forEach(function (w) {
+                if (!w) return;
+                if (/^\s+$/.test(w)) { f.appendChild(document.createTextNode(' ')); return; }
+                var s = document.createElement('span'); s.className = 'ink-w';
+                Array.from(w).forEach(function (ch) {
+                  var l = document.createElement('span'); l.className = 'ink-c'; l.textContent = ch;
+                  l.style.setProperty('--i', i); l.style.setProperty('--r', (i % 3 - 1) * 14 + 'deg'); i++; s.appendChild(l);
+                });
+                f.appendChild(s);
+              });
+              n.replaceChild(f, c);
+            });
+          })(node);
+          node.setAttribute('aria-label', text);
+          return i;
+        };
+        if (calm || !window.Promise) return;
+        var h = document.querySelector('.brand-row h1'), t = document.querySelector('.brand-row .tagline'), done;
+        h.style.setProperty('--step', '62ms'); window.inkSplit(h); h.classList.add('ink');
+        t.classList.add('ink', 'ink-p'); t.style.setProperty('--wait', '0.75s'); t.style.setProperty('--end', '1.35s');
+        function go() { if (done) return; done = true; h.classList.add('ink-on'); t.classList.add('ink-on'); }
+        setTimeout(go, 900);
+        if (document.fonts && document.fonts.load) document.fonts.load('40px Oliver').then(go, go);
+      })();
+    </script>
 
     <div class="banner-hero">
       <img src="assets/hero-banner.jpg" alt="Chamarel viewpoint over Le Morne, Île aux Bénitiers and La Tourelle du Tamarin" width="2400" height="931">
@@ -1654,7 +1742,7 @@
   <section class="picks">
     <div class="picks-head" id="picks">
       <div class="module-eyebrow">✦ Moris Diaries Picks</div>
-      <h2 class="module-h2">Eight Days We'd Book Again</h2>
+      <h2 class="module-h2">Eight Days We'd <span class="ink-u">Book Again</span></h2>
       <p class="module-sub">Tried, loved and booked direct with local operators. Tap one to reserve it with us on WhatsApp — we'll confirm dates and prices.</p>
     </div>
 
@@ -1724,7 +1812,7 @@
        (name + dates) that sends the request to WhatsApp. -->
   <section class="rental-wrap" id="car-rental" hidden>
     <div class="module-eyebrow">✦ Car Rental</div>
-    <h2 class="module-h2">Pick a Car, We'll Hold It</h2>
+    <h2 class="module-h2">Pick a Car, <span class="ink-u">We'll Hold It</span></h2>
     <p class="module-sub">Every car is automatic. Tap one, tell us your dates and we'll confirm on WhatsApp.</p>
 
     <div class="activities-filter" id="rentalFilter" role="tablist"></div>
@@ -1764,7 +1852,7 @@
   <div class="after-picks">
     <div id="trip-concierge">
     <div class="module-eyebrow">✦ Trip Concierge</div>
-    <h2 class="module-h2">A Free Custom Itinerary</h2>
+    <h2 class="module-h2">A <span class="ink-u">Free</span> Custom Itinerary</h2>
     <p class="module-sub">Three routes, hand-built from the app's real posts and places. Pick one, or tell us your dates below.</p>
 
     <div class="routes">
@@ -1884,7 +1972,7 @@
 
   <div class="activities-wrap" id="activities">
     <div class="module-eyebrow">✦ Excursions &amp; Activities</div>
-    <h2 class="module-h2">Book an Activity</h2>
+    <h2 class="module-h2">Book an <span class="ink-u">Activity</span></h2>
     <p class="module-sub">Reserve with Mauritian operators on WhatsApp, or browse GetYourGuide's picks.</p>
 
     <div id="gygTrending"></div>
@@ -3554,6 +3642,139 @@
         }
       })
       .catch(function () { /* strip stays hidden */ });
+  })();
+</script>
+
+<script>
+  // Text motion — headings write themselves once as they come into view, the wave dividers
+  // draw, the flights line flips like a departures board, and the hotel sentence shows what its
+  // choices do until someone touches that section. Off with reduced motion. Event: text_demo
+  // ('stay-sentence', once per page view, when the sentence starts showing its choices).
+  (function () {
+    if (!window.matchMedia || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!('IntersectionObserver' in window) || !window.inkSplit) return;
+    function all(q) { return [].slice.call(document.querySelectorAll(q)); }
+    function frames(ms, step, end) {
+      var t0;
+      requestAnimationFrame(function f(t) {
+        if (t0 === undefined) t0 = t;
+        var p = Math.min(1, (t - t0) / ms);
+        step(p);
+        if (p < 1) requestAnimationFrame(f); else if (end) end();
+      });
+    }
+
+    // Runs fn once when el scrolls in; anything already passed (a jump link) counts as seen.
+    function seen(el, fn) {
+      var io = new IntersectionObserver(function (es) {
+        if (es.some(function (e) { return e.isIntersecting; })) { io.disconnect(); fn(el); }
+      }, { rootMargin: '20000px 0px -9% 0px' });
+      io.observe(el);
+    }
+    function write(el) { seen(el, function () { el.classList.add('ink-on'); }); }
+
+    all('.module-eyebrow, .signature-eyebrow').forEach(function (e) {
+      var m = e.textContent.trim().match(/^✦\s*([\s\S]*)$/);
+      if (!m || e.children.length) return;
+      e.innerHTML = '<span class="ink-e"><i aria-hidden="true">✦</i> <span></span></span>';
+      e.querySelector('span span').textContent = m[1];
+      e.classList.add('ink'); write(e);
+    });
+    all('.module-h2, .signature h3').forEach(function (h) {
+      h.style.setProperty('--end', window.inkSplit(h) * 34 + 200 + 'ms');
+      h.classList.add('ink'); write(h);
+    });
+    all('.module-sub, .footer-name').forEach(function (p) { p.classList.add('ink', 'ink-p'); write(p); });
+    all('.signature').forEach(function (s) {
+      [].forEach.call(s.querySelectorAll('.meta, li, .swap-note'), function (x, i) { x.style.setProperty('--n', i); });
+      s.classList.add('ink', 'ink-list'); write(s);
+    });
+    all('.section-divider, .footer-divider').forEach(function (d) {
+      [].forEach.call(d.querySelectorAll('path'), function (p) { p.setAttribute('pathLength', '1'); });
+      d.classList.add('ink', 'ink-wave'); write(d);
+    });
+
+    // Flights to Mauritius — departures board, once in view and again on hover.
+    var bar = document.getElementById('flightsOpen'), line = bar && bar.querySelector('.flights-text b'), busy;
+    function flap() {
+      if (busy || !line) return;
+      busy = true;
+      var text = line.textContent, ABC = 'aeohnsutrzvcgkpxydb', cells = [], tick = -1;
+      var range = document.createRange(), tn = line.firstChild;
+      var w = Array.from(text).map(function (c, i) { range.setStart(tn, i); range.setEnd(tn, i + 1); return range.getBoundingClientRect().width; });
+      bar.setAttribute('aria-label', [].map.call(bar.querySelectorAll('b, small, .flights-cta'), function (x) { return x.textContent; }).join('. '));
+      line.style.height = line.offsetHeight + 'px'; line.style.whiteSpace = 'nowrap';
+      line.textContent = '';
+      Array.from(text).forEach(function (c, i) {
+        var s = document.createElement('span'); s.className = 'ink-flap'; s.style.width = w[i] + 'px'; s.textContent = c;
+        line.appendChild(s); cells.push(s);
+      });
+      frames(1300, function (p) {
+        var t = Math.floor(p * 26); if (t === tick) return; tick = t;
+        cells.forEach(function (s, i) {
+          var on = p === 1 || text[i] === ' ' || p > 0.25 + 0.75 * (i + 1) / cells.length;
+          s.textContent = on ? text[i] : ABC[(t * 7 + i * 5) % ABC.length];
+          s.classList.toggle('spin', !on);
+        });
+      }, function () { line.textContent = text; line.removeAttribute('style'); bar.removeAttribute('aria-label'); setTimeout(function () { busy = false; }, 600); });
+    }
+    if (line) {
+      seen(bar, flap);
+      bar.addEventListener('pointerenter', function (e) { if (e.pointerType === 'mouse') flap(); });
+    }
+
+    // Coordinates in the footer find their place.
+    all('footer .coords').forEach(function (c) {
+      var text = c.textContent;
+      seen(c, function () {
+        frames(1600, function (p) {
+          var k = 1 - Math.pow(1 - p, 3);
+          c.textContent = p === 1 ? text : text.replace(/\d+\.\d/g, function (n) { return (n * k).toFixed(1); });
+        });
+      });
+    });
+
+    // Hotel sentence — shows a few of its own choices, then rests. Nothing is filtered, and any
+    // touch in the section puts it straight back.
+    var stay = document.getElementById('where-to-stay'), mood = document.getElementById('saMood'), shore = document.getElementById('saShore');
+    if (stay && mood && shore) {
+      var timer, stopped;
+      var plain = function () { mood.classList.remove('ink-fade'); shore.classList.remove('ink-fade'); };
+      var rest = function (e) {
+        if (stopped) return;
+        stopped = true; clearTimeout(timer); plain();
+        if (e.type !== 'change') { mood.value = 'all'; shore.value = 'all'; }
+      };
+      var demo = function () {
+        if (stopped || mood.value !== 'all' || shore.value !== 'all') return;
+        var h2 = mood.parentNode, tall = h2.offsetHeight;
+        // Only choices that keep the sentence the same height, so nothing below it moves.
+        var steps = [['couple', 'all'], ['couple', 'west'], ['nature', 'all'], ['nature', 'south'], ['wind', 'east'], ['family', 'all'], ['family', 'north'], ['wind', 'all'], ['golf', 'all'], ['all', 'west'], ['all', 'north']].filter(function (s) {
+          mood.value = s[0]; shore.value = s[1];
+          return mood.value === s[0] && shore.value === s[1] && h2.offsetHeight === tall;
+        });
+        mood.value = 'all'; shore.value = 'all';
+        if (!steps.length) return;
+        steps = steps.filter(function (s, i) { return s[1] !== 'all' || !steps[i + 1] || steps[i + 1][0] !== s[0]; }).slice(0, 4);
+        steps.push(['all', 'all']);
+        if (window.trackEvent) window.trackEvent('text_demo', 'stay-sentence', { steps: steps.length - 1 });
+        var k = 0;
+        (function next() {
+          var s = steps[k++];
+          mood.classList.toggle('ink-fade', mood.value !== s[0]); shore.classList.toggle('ink-fade', shore.value !== s[1]);
+          timer = setTimeout(function () {
+            mood.value = s[0]; shore.value = s[1]; plain();
+            if (k < steps.length) timer = setTimeout(next, 1700); else stopped = true;
+          }, 270);
+        })();
+      };
+      ['pointerdown', 'focusin', 'keydown', 'change'].forEach(function (ev) { stay.addEventListener(ev, rest, true); });
+      var sio = new IntersectionObserver(function (es) {
+        if (!es[0].isIntersecting) return;
+        sio.disconnect(); timer = setTimeout(demo, 1100);
+      }, { rootMargin: '0px 0px -18% 0px', threshold: 1 });
+      sio.observe(mood.parentNode);
+    }
   })();
 </script>
 
