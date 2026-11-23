@@ -1194,7 +1194,7 @@
   @media (min-width: 960px) {
     .sa-head { grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 18px 40px; }
     .sa-head .sa-count { grid-column: 1 / -1; }
-    .sa-atlas { display: grid; grid-template-columns: 214px minmax(0, 1fr) 222px; gap: 0 20px; align-items: stretch; }
+    .sa-atlas { display: grid; grid-template-columns: 232px minmax(0, 1fr) 232px; gap: 0 12px; align-items: stretch; }
     .sa-leaders { display: block; position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; }
     .sa-leaders path { fill: none; stroke: var(--sand); stroke-opacity: 0.22; stroke-width: 1; }
     .sa-leaders path.on { stroke: var(--clay-hi); stroke-opacity: 1; stroke-width: 1.5; }
@@ -1202,13 +1202,13 @@
     .sa-frame { margin: 0; overflow: visible; align-self: center; }
     .sa-frame > svg { aspect-ratio: 5720 / 6320; overflow: visible; }
     .sa-bub, .sa-hint, .sa-back, .sa-more, .sa-pop { display: none !important; }
-    .sa-names, .sa-names.open { display: flex; flex-direction: column; justify-content: space-between; gap: 16px; position: relative; z-index: 3; padding: 0; min-width: 0; }
+    .sa-names, .sa-names.open { display: flex; flex-direction: column; justify-content: space-between; gap: 11px; position: relative; z-index: 3; padding: 0; min-width: 0; }
     .sa-names.l { order: -1; text-align: right; }
     .sa-area { margin: 0; }
-    .sa-name { justify-content: flex-start; padding: 2px 0; border: 0; font-size: 15px; text-align: inherit; }
+    .sa-name { justify-content: flex-start; padding: 1.5px 0; border: 0; font-size: 15px; text-align: inherit; }
     .sa-names.l .sa-name { flex-direction: row-reverse; }
     .sa-name.on span { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
-    .sa-inland { display: block; position: absolute; left: 50%; top: 53%; width: min(250px, 46%); transform: translate(-50%, -50%); background: var(--ink); border-radius: 6px; overflow: hidden; box-shadow: 0 24px 60px -18px rgba(0,0,0,0.75); z-index: 4; }
+    .sa-inland { display: block; position: absolute; left: 52%; top: 59%; width: min(250px, 44%); transform: translate(-50%, -50%); background: var(--ink); border-radius: 6px; overflow: hidden; box-shadow: 0 24px 60px -18px rgba(0,0,0,0.75); z-index: 4; }
     .sa-guide { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 60px; align-items: start; }
     .sa-side { display: block; position: sticky; top: 24px; }
     .sa-side svg { display: block; width: 100%; height: auto; overflow: visible; }
@@ -1216,6 +1216,11 @@
     .sa-chap h3 { font-size: 34px; } .sa-chap p { font-size: 21px; }
     .sa-tiles { grid-template-columns: repeat(auto-fill, minmax(205px, 1fr)); gap: 26px 18px; }
     .sa-tiles .sa-body { padding: 13px 14px 15px; } .sa-tiles .sa-nm { font-size: 19px; } .sa-tiles .sa-for { font-size: 12.5px; }
+  }
+  @media (min-width: 960px) and (max-width: 1179px) {
+    .sa-atlas { grid-template-columns: 196px minmax(0, 1fr) 196px; gap: 0 6px; }
+    .sa-name { font-size: 13px; gap: 6px; padding: 0.5px 0; }
+    .sa-area h3 { font-size: 10.5px; letter-spacing: 0.06em; }
   }
   @media (prefers-reduced-motion: reduce) { .stay-wrap * { transition: none !important; animation: none !important; } }
 
@@ -2846,9 +2851,10 @@
     // id, label, shore, margin, phone bubble x/y, phone label side (s = after, e = before)
     var AREAS = [
       ['grand-baie', 'Grand Baie', 'north', 'l', 2950, 640, 'e'], ['trou-aux-biches', 'Trou aux Biches coast', 'north', 'l', 2520, 1180, 'e'],
-      ['balaclava', 'Balaclava coast', 'north', 'l', 2130, 1760, 'e'], ['albion', 'Albion', 'west', 'l', 1230, 3190, 's'],
-      ['flic-en-flac', 'Flic en Flac', 'west', 'l', 880, 3920, 's'], ['tamarin', 'Tamarin', 'west', 'l', 1060, 4560, 's'],
+      ['balaclava', 'Balaclava coast', 'north', 'l', 2130, 1760, 'e'], ['port-louis', 'Port Louis', 'north', 'l', 1720, 2480, 'e'], ['albion', 'Albion', 'west', 'l', 1230, 3190, 's'],
+      ['flic-en-flac', 'Flic en Flac', 'west', 'l', 880, 3920, 's'], ['tamarin', 'Tamarin and Black River', 'west', 'l', 1060, 4560, 's'],
       ['le-morne', 'Le Morne', 'south', 'l', 560, 5800, 's'],
+      ['chamarel', 'Chamarel', 'south', 'l', 1330, 5330, 's'],
       ['far-north', 'The far north', 'north', 'r', 3960, 720, 's'], ['poste-lafayette', 'Poste Lafayette', 'east', 'r', 4660, 1960, 'e'],
       ['belle-mare', 'Belle Mare coast', 'east', 'r', 5060, 2700, 'e'],
       ['trou-deau-douce', 'Trou d’Eau Douce', 'east', 'r', 5230, 3520, 'e'], ['beau-champ', 'Beau Champ', 'east', 'r', 5060, 4080, 'e'],
@@ -2901,14 +2907,17 @@
       if (h.area.id === 'le-morne') d = [-50, 0];
       if (h.area.id === 'balaclava' || h.area.id === 'trou-aux-biches') d = [-55, 0];
       if (h.area.id === 'far-north') d = [20, -35];
-      var w = 420, ht = 280, x = h.x + d[0] - w / 2, y = h.y + d[1] - ht / 2;
+      if (h.area.id === 'chamarel') d = [-90, 30];
+      if (h.area.id === 'port-louis') d = [-40, -35];
+      var z = h.area.id === 'chamarel' ? 4 : 1; // inland: zoom out until the coast shows
+      var w = 420 * z, ht = 280 * z, x = h.x + d[0] * z - w / 2, y = h.y + d[1] * z - ht / 2;
       var s = sv('svg', { viewBox: [x, y, w, ht].join(' '), preserveAspectRatio: 'xMidYMid slice', role: 'img', 'aria-label': 'Map of the shore at ' + h.name });
       sv('rect', { x: x, y: y, width: w, height: ht, fill: 'url(#sa-sea-' + (h.area.id === 'le-morne' ? 'west' : h.area.shore) + ')' }, s);
-      [[74, 0.06], [46, 0.09], [22, 0.14]].forEach(function (k) { use('main', { fill: 'none', stroke: '#fff', 'stroke-opacity': k[1], 'stroke-width': k[0], 'stroke-linejoin': 'round' }, s); });
+      [[74, 0.06], [46, 0.09], [22, 0.14]].forEach(function (k) { use('main', { fill: 'none', stroke: '#fff', 'stroke-opacity': k[1], 'stroke-width': k[0] * z, 'stroke-linejoin': 'round' }, s); });
       use('main', { fill: '#1b332b' }, s); use('isl', { fill: '#1b332b' }, s);
-      use('beach', { fill: '#F5F0E6', stroke: '#F5F0E6', 'stroke-width': 3.5, 'stroke-linejoin': 'round' }, s);
-      sv('circle', { cx: h.x, cy: h.y, r: 13, fill: 'none', stroke: '#F5F0E6', 'stroke-width': 1.6 }, s);
-      sv('circle', { cx: h.x, cy: h.y, r: 6, fill: '#E8834C', stroke: '#0E1A17', 'stroke-width': 1.6 }, s);
+      use('beach', { fill: '#F5F0E6', stroke: '#F5F0E6', 'stroke-width': 3.5 * z, 'stroke-linejoin': 'round' }, s);
+      sv('circle', { cx: h.x, cy: h.y, r: 13 * z, fill: 'none', stroke: '#F5F0E6', 'stroke-width': 1.6 * z }, s);
+      sv('circle', { cx: h.x, cy: h.y, r: 6 * z, fill: '#E8834C', stroke: '#0E1A17', 'stroke-width': 1.6 * z }, s);
       return s;
     }
     function card(h, from) {
