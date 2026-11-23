@@ -1205,7 +1205,7 @@
     .sa-names, .sa-names.open { display: flex; flex-direction: column; justify-content: space-between; gap: 16px; position: relative; z-index: 3; padding: 0; min-width: 0; }
     .sa-names.l { order: -1; text-align: right; }
     .sa-area { margin: 0; }
-    .sa-name { justify-content: flex-start; padding: 3px 0; border: 0; font-size: 15.5px; text-align: inherit; }
+    .sa-name { justify-content: flex-start; padding: 2px 0; border: 0; font-size: 15px; text-align: inherit; }
     .sa-names.l .sa-name { flex-direction: row-reverse; }
     .sa-name.on span { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
     .sa-inland { display: block; position: absolute; left: 50%; top: 53%; width: min(250px, 46%); transform: translate(-50%, -50%); background: var(--ink); border-radius: 6px; overflow: hidden; box-shadow: 0 24px 60px -18px rgba(0,0,0,0.75); z-index: 4; }
@@ -2847,8 +2847,10 @@
     var AREAS = [
       ['grand-baie', 'Grand Baie', 'north', 'l', 2950, 640, 'e'], ['trou-aux-biches', 'Trou aux Biches coast', 'north', 'l', 2520, 1180, 'e'],
       ['balaclava', 'Balaclava coast', 'north', 'l', 2130, 1760, 'e'], ['albion', 'Albion', 'west', 'l', 1230, 3190, 's'],
-      ['flic-en-flac', 'Flic en Flac', 'west', 'l', 920, 4160, 's'], ['le-morne', 'Le Morne', 'south', 'l', 560, 5800, 's'],
-      ['far-north', 'The far north', 'north', 'r', 3960, 720, 's'], ['belle-mare', 'Belle Mare coast', 'east', 'r', 5060, 2700, 'e'],
+      ['flic-en-flac', 'Flic en Flac', 'west', 'l', 880, 3920, 's'], ['tamarin', 'Tamarin', 'west', 'l', 1060, 4560, 's'],
+      ['le-morne', 'Le Morne', 'south', 'l', 560, 5800, 's'],
+      ['far-north', 'The far north', 'north', 'r', 3960, 720, 's'], ['poste-lafayette', 'Poste Lafayette', 'east', 'r', 4660, 1960, 'e'],
+      ['belle-mare', 'Belle Mare coast', 'east', 'r', 5060, 2700, 'e'],
       ['trou-deau-douce', 'Trou d’Eau Douce', 'east', 'r', 5230, 3520, 'e'], ['beau-champ', 'Beau Champ', 'east', 'r', 5060, 4080, 'e'],
       ['blue-bay', 'Blue Bay', 'south', 'r', 4400, 5700, 'e'], ['bel-ombre', 'Bel Ombre', 'south', 'r', 1640, 6330, 's']
     ].map(function (a) { return { id: a[0], label: a[1], shore: a[2], side: a[3], bx: a[4], by: a[5], ls: a[6] }; });
