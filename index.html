@@ -1128,7 +1128,8 @@
   .sa-name i { font: 600 12px 'Inter', sans-serif; color: var(--clay-hi); flex: none; }
   .sa-name:hover, .sa-name.on { color: var(--clay-hi); }
   .sa-name.off { opacity: 0.26; }
-  .sa-plus { display: none; }
+  .sa-tog { text-transform: inherit; letter-spacing: inherit; }
+  .sa-tog i { display: none; }
   .sa-inland { display: none; }
 
   /* popup over the map (phones) */
@@ -1203,16 +1204,17 @@
     .sa-frame { margin: 0; overflow: visible; align-self: center; }
     .sa-frame > svg { aspect-ratio: 5720 / 6320; overflow: visible; }
     .sa-bub, .sa-hint, .sa-back, .sa-more, .sa-pop { display: none !important; }
-    .sa-names, .sa-names.open { display: flex; flex-direction: column; justify-content: space-between; gap: 11px; position: relative; z-index: 3; padding: 0; min-width: 0; }
+    .sa-names, .sa-names.open { display: flex; flex-direction: column; justify-content: space-between; gap: 9px; position: relative; z-index: 3; padding: 0; min-width: 0; }
     .sa-names.l { order: -1; text-align: right; }
     .sa-area { margin: 0; }
-    .sa-name { justify-content: flex-start; padding: 2.5px 0; border: 0; font-size: 15px; text-align: inherit; }
+    .sa-name { justify-content: flex-start; padding: 1.5px 0; border: 0; font-size: 15px; text-align: inherit; }
     .sa-names.l .sa-name { flex-direction: row-reverse; }
     .sa-name.xtra { display: none; }
-    .sa-area.all .sa-name.xtra, .sa-filtered .sa-name.xtra:not(.off) { display: flex; }
-    .sa-plus { display: inline-block; padding: 3px 0; font: 600 12px 'Inter', sans-serif; color: var(--muted); }
-    .sa-plus:hover { color: var(--clay-hi); }
-    .sa-filtered .sa-plus { display: none; }
+    .sa-area h3 { margin: 0 0 1px; }
+    .sa-tog i { display: inline-block; min-width: 19px; margin-left: 7px; padding: 1px 5px; border-radius: 9px; background: rgba(245,240,230,0.09); color: var(--sand-dim); font: 600 10.5px/1.45 'Inter', sans-serif; letter-spacing: 0; text-align: center; transition: background 0.15s, color 0.15s; }
+    .sa-tog:hover i, .sa-area.mine .sa-tog i { background: var(--tint); color: var(--ink); }
+    .sa-area.none { opacity: 0.32; }
+    .sa-area.none .sa-tog i { display: none; }
     .sa-name.on span { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
     .sa-inland { display: block; position: absolute; left: 52%; top: 59%; width: min(250px, 44%); transform: translate(-50%, -50%); background: var(--ink); border-radius: 6px; overflow: hidden; box-shadow: 0 24px 60px -18px rgba(0,0,0,0.75); z-index: 4; }
     .sa-guide { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 60px; align-items: start; }
@@ -2870,7 +2872,8 @@
     var MOODS = [['all', 'just looking'], ['couple', 'on honeymoon'], ['family', 'bringing the kids'], ['adults', 'after adults-only calm'],
       ['golf', 'packing golf clubs'], ['wind', 'chasing the wind'], ['allin', 'going all-inclusive'], ['small', 'fond of small hotels'], ['nature', 'craving nature']];
     var MOOD_SHORT = { couple: 'Honeymoon', family: 'Family', adults: 'Adults only', golf: 'Golf', wind: 'Kite lagoon', allin: 'All-inclusive', small: 'Small hotels', nature: 'Nature' };
-    var TOP = 5; // hotels listed per coast on desktop before "+ N more"
+    var TOP = 2; // hotels listed per coast on desktop until its heading is clicked
+    var openArea = { l: null, r: null };
     var H = [], by = {}, GUIDE = [], fallback = null, coast = null;
     var st = { mood: 'all', shore: 'all', mode: 'map', on: null, area: null };
 
@@ -3049,8 +3052,14 @@
     function buildNames() {
       AREAS.forEach(function (a) {
         var hs = H.filter(function (h) { return h.area === a; }); if (!hs.length) return;
-        var box = tint(el('div', 'sa-area'), a.shore); box.id = 'sa-area-' + a.id; box.appendChild(el('h3', '', a.label));
-        var top = hs.slice().sort(best).slice(0, hs.length > TOP + 1 ? TOP : hs.length);
+        var box = tint(el('div', 'sa-area'), a.shore); box.id = 'sa-area-' + a.id; 
+        var h3 = el('h3'), tg = btn('sa-tog', a.label); tg.appendChild(el('i')); h3.appendChild(tg); box.appendChild(h3);
+        tg.addEventListener('click', function () {
+          if (small.matches) return;
+          var open = openArea[a.side] !== a.id; openArea[a.side] = open ? a.id : null;
+          if (open) { track('section_expand', 'stay-area-' + a.id, { count: inArea(a).length }); var b = inArea(a).sort(best)[0]; if (b) pick(b.id); }
+          listNames();
+        });
         hs.forEach(function (h) {
           var r;
           if (h.url || fallback) { r = el('a', 'sa-name'); book(r, h, 'name'); }
@@ -3062,21 +3071,10 @@
               zoom(a, h); $('saFrame').scrollIntoView({ block: 'center', behavior: still ? 'auto' : 'smooth' });
             });
           }
-          if (top.indexOf(h) === -1) r.classList.add('xtra');
           r.setAttribute('data-h', h.id); r.appendChild(el('span', '', h.name)); if (h.url) r.appendChild(el('i', '', '↗'));
           r.addEventListener('mouseenter', function () { pick(h.id); }); r.addEventListener('focus', function () { pick(h.id); });
           box.appendChild(r);
         });
-        if (top.length < hs.length) {
-          var n = hs.length - top.length, mb = btn('sa-plus', '+ ' + n + ' more');
-          mb.setAttribute('aria-expanded', 'false');
-          mb.onclick = function () {
-            var open = !box.classList.contains('all'); cls(box, 'all', open); mb.setAttribute('aria-expanded', open);
-            mb.textContent = open ? 'Show fewer' : '+ ' + n + ' more'; leaders();
-            if (open) track('section_expand', 'stay-area-' + a.id);
-          };
-          box.appendChild(mb);
-        }
         $(a.side === 'l' ? 'saL' : 'saR').appendChild(box);
       });
       var more = $('saMore'), label = 'See all ' + H.length + ' hotels by name'; more.textContent = label;
@@ -3085,6 +3083,19 @@
         cls($('saL'), 'open', open); cls($('saR'), 'open', open); more.textContent = open ? 'Hide the list' : label;
         if (open) track('section_expand', 'stay-names');
       };
+    }
+    // Desktop: each coast shows its first couple of hotels; clicking its heading lists them all
+    // and folds the other coasts on that side to headings, so the lists never outgrow the map.
+    function listNames() {
+      AREAS.forEach(function (a) {
+        var box = $('sa-area-' + a.id); if (!box) return;
+        var hs = inArea(a).sort(best), open = openArea[a.side], mine = open === a.id, cap = hs.length > TOP + 1 ? TOP : hs.length;
+        var show = mine ? hs : open ? [] : hs.slice(0, cap);
+        [].forEach.call(box.querySelectorAll('.sa-name'), function (r) { cls(r, 'xtra', show.indexOf(by[r.getAttribute('data-h')]) === -1); });
+        var tg = box.querySelector('.sa-tog'); tg.lastChild.textContent = hs.length ? hs.length : '';
+        tg.setAttribute('aria-expanded', mine || (!open && cap === hs.length)); cls(box, 'mine', mine); cls(box, 'none', !hs.length);
+      });
+      leaders();
     }
     function leaders() {
       var L = $('saLeaders'); L.textContent = '';
@@ -3095,8 +3106,9 @@
         var left = a.side === 'l', head = node.querySelector('h3').getBoundingClientRect(), box = node.getBoundingClientRect();
         var t = H.filter(function (h) { return h.area === a; }).sort(function (p, q) { return left ? p.x - q.x : q.x - p.x; })[0];
         var px = m.a * t.x + m.e - o.left, py = m.d * t.y + m.f - o.top, x0 = (left ? box.right + 8 : box.left - 8) - o.left, y0 = head.top + head.height / 2 - o.top;
-        // Bel Ombre sits on the far bottom shore: run its line through the sea, under the island
-        var d = a.id === 'bel-ombre' ? 'M' + x0 + ' ' + (box.bottom - 12 - o.top) + 'H' + px + 'V' + (py + 9)
+        // Bel Ombre and Savanne sit on the far bottom shore: run their lines through the sea
+        var d = a.id === 'bel-ombre' ? 'M' + x0 + ' ' + (box.bottom - 10 - o.top) + 'H' + px + 'V' + (py + 9)
+          : a.id === 'savanne' ? 'M' + x0 + ' ' + y0 + 'H' + (x0 - 14) + 'V' + py + 'H' + (px + 2)
           : 'M' + x0 + ' ' + y0 + 'H' + (x0 + (left ? 26 : -26)) + 'L' + (px + (left ? -8 : 8)) + ' ' + py;
         sv('path', { d: d, 'data-a': a.id }, L);
       });
@@ -3161,7 +3173,7 @@
         cls(pins[h.id], 'on', me); cls(pins[h.id], 'off', off && !me); cls(gp[h.id], 'off', !c); cls(gp[h.id], 'on', h.id === st.on && c);
       });
       AREAS.forEach(function (a) { var g = bubs[a.id], n = inArea(a).length; if (!g) return; g.querySelector('.n').textContent = n; g.setAttribute('aria-label', a.label + ', ' + n + (n === 1 ? ' hotel' : ' hotels')); cls(g, 'off', !n); });
-      [].forEach.call(wrap.querySelectorAll('.sa-name'), function (r) { var h = by[r.getAttribute('data-h')]; cls(r, 'on', h === on && !small.matches); cls(r, 'off', !fits(h)); });
+      [].forEach.call(wrap.querySelectorAll('.sa-name'), function (r) { var h = by[r.getAttribute('data-h')]; cls(r, 'on', h === on && !small.matches); cls(r.parentNode, 'cur', on && h.area === on.area); cls(r, 'off', !fits(h)); });
       [].forEach.call(wrap.querySelectorAll('.sa-chap p a'), function (r) { cls(r, 'off', st.shore !== 'all' && by[r.getAttribute('data-h')].area.shore !== st.shore); });
       [].forEach.call($('saLeaders').children, function (p) { var a = p.getAttribute('data-a'); cls(p, 'on', on && on.area.id === a); cls(p, 'off', !H.some(function (h) { return h.area.id === a && fits(h); })); });
       var side = $('saSide').querySelector('p'), g = GUIDE.filter(function (x) { return x.mood === chap; })[0];
@@ -3177,8 +3189,7 @@
       if (st.area && map) unzoom();
       if (n.length && !fits(by[st.on])) pick(n.slice().sort(best)[0].id);
       if (st.mode === 'grid') buildGrid();
-      cls(wrap, 'sa-filtered', st.mood !== 'all' || st.shore !== 'all');
-      paint(); leaders();
+      paint(); openArea.l = openArea.r = null; listNames();
       $('saAsk').href = wa('Hi Moris Diaries! Can you help us pick a hotel?' + (st.mood !== 'all' ? ' We’re ' + $('saMood').selectedOptions[0].textContent + '.' : '') + (st.shore !== 'all' ? ' We’d like ' + $('saShore').selectedOptions[0].textContent : ''));
     }
     function mode(m, quiet) {
