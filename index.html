@@ -1128,6 +1128,7 @@
   .sa-name i { font: 600 12px 'Inter', sans-serif; color: var(--clay-hi); flex: none; }
   .sa-name:hover, .sa-name.on { color: var(--clay-hi); }
   .sa-name.off { opacity: 0.26; }
+  .sa-plus { display: none; }
   .sa-inland { display: none; }
 
   /* popup over the map (phones) */
@@ -1205,8 +1206,13 @@
     .sa-names, .sa-names.open { display: flex; flex-direction: column; justify-content: space-between; gap: 11px; position: relative; z-index: 3; padding: 0; min-width: 0; }
     .sa-names.l { order: -1; text-align: right; }
     .sa-area { margin: 0; }
-    .sa-name { justify-content: flex-start; padding: 1.5px 0; border: 0; font-size: 15px; text-align: inherit; }
+    .sa-name { justify-content: flex-start; padding: 2.5px 0; border: 0; font-size: 15px; text-align: inherit; }
     .sa-names.l .sa-name { flex-direction: row-reverse; }
+    .sa-name.xtra { display: none; }
+    .sa-area.all .sa-name.xtra, .sa-filtered .sa-name.xtra:not(.off) { display: flex; }
+    .sa-plus { display: inline-block; padding: 3px 0; font: 600 12px 'Inter', sans-serif; color: var(--muted); }
+    .sa-plus:hover { color: var(--clay-hi); }
+    .sa-filtered .sa-plus { display: none; }
     .sa-name.on span { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
     .sa-inland { display: block; position: absolute; left: 52%; top: 59%; width: min(250px, 44%); transform: translate(-50%, -50%); background: var(--ink); border-radius: 6px; overflow: hidden; box-shadow: 0 24px 60px -18px rgba(0,0,0,0.75); z-index: 4; }
     .sa-guide { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 60px; align-items: start; }
@@ -2858,12 +2864,13 @@
       ['far-north', 'The far north', 'north', 'r', 3960, 720, 's'], ['poste-lafayette', 'Poste Lafayette', 'east', 'r', 4660, 1960, 'e'],
       ['belle-mare', 'Belle Mare coast', 'east', 'r', 5060, 2700, 'e'],
       ['trou-deau-douce', 'Trou d’Eau Douce', 'east', 'r', 5230, 3520, 'e'], ['beau-champ', 'Beau Champ', 'east', 'r', 5060, 4080, 'e'],
-      ['blue-bay', 'Blue Bay', 'south', 'r', 4400, 5700, 'e'], ['bel-ombre', 'Bel Ombre', 'south', 'r', 1640, 6330, 's']
+      ['blue-bay', 'Blue Bay coast', 'south', 'r', 4400, 5560, 'e'], ['savanne', 'Savanne', 'south', 'r', 2960, 6020, 's'], ['bel-ombre', 'Bel Ombre', 'south', 'r', 1560, 6330, 's']
     ].map(function (a) { return { id: a[0], label: a[1], shore: a[2], side: a[3], bx: a[4], by: a[5], ls: a[6] }; });
     var SHORES = { west: ['The sunset side', 'West coast'], north: ['The north', 'Grand Baie and around'], east: ['The sunrise side', 'East coast'], south: ['The wild south', 'Le Morne to Blue Bay'] };
     var MOODS = [['all', 'just looking'], ['couple', 'on honeymoon'], ['family', 'bringing the kids'], ['adults', 'after adults-only calm'],
-      ['golf', 'packing golf clubs'], ['wind', 'chasing the wind'], ['allin', 'going all-inclusive'], ['small', 'fond of small hotels']];
-    var MOOD_SHORT = { couple: 'Honeymoon', family: 'Family', adults: 'Adults only', golf: 'Golf', wind: 'Kite lagoon', allin: 'All-inclusive', small: 'Small hotels' };
+      ['golf', 'packing golf clubs'], ['wind', 'chasing the wind'], ['allin', 'going all-inclusive'], ['small', 'fond of small hotels'], ['nature', 'craving nature']];
+    var MOOD_SHORT = { couple: 'Honeymoon', family: 'Family', adults: 'Adults only', golf: 'Golf', wind: 'Kite lagoon', allin: 'All-inclusive', small: 'Small hotels', nature: 'Nature' };
+    var TOP = 5; // hotels listed per coast on desktop before "+ N more"
     var H = [], by = {}, GUIDE = [], fallback = null, coast = null;
     var st = { mood: 'all', shore: 'all', mode: 'map', on: null, area: null };
 
@@ -2907,9 +2914,10 @@
       if (h.area.id === 'le-morne') d = [-50, 0];
       if (h.area.id === 'balaclava' || h.area.id === 'trou-aux-biches') d = [-55, 0];
       if (h.area.id === 'far-north') d = [20, -35];
-      if (h.area.id === 'chamarel') d = [-90, 30];
+      var inland = { chamarel: 4, savanne: 6 }[h.area.id];
+      if (inland) d = h.area.id === 'chamarel' ? [-90, 30] : [0, 60];
       if (h.area.id === 'port-louis') d = [-40, -35];
-      var z = h.area.id === 'chamarel' ? 4 : 1; // inland: zoom out until the coast shows
+      var z = inland || 1; // inland: zoom out until the coast shows
       var w = 420 * z, ht = 280 * z, x = h.x + d[0] * z - w / 2, y = h.y + d[1] * z - ht / 2;
       var s = sv('svg', { viewBox: [x, y, w, ht].join(' '), preserveAspectRatio: 'xMidYMid slice', role: 'img', 'aria-label': 'Map of the shore at ' + h.name });
       sv('rect', { x: x, y: y, width: w, height: ht, fill: 'url(#sa-sea-' + (h.area.id === 'le-morne' ? 'west' : h.area.shore) + ')' }, s);
@@ -3042,6 +3050,7 @@
       AREAS.forEach(function (a) {
         var hs = H.filter(function (h) { return h.area === a; }); if (!hs.length) return;
         var box = tint(el('div', 'sa-area'), a.shore); box.id = 'sa-area-' + a.id; box.appendChild(el('h3', '', a.label));
+        var top = hs.slice().sort(best).slice(0, hs.length > TOP + 1 ? TOP : hs.length);
         hs.forEach(function (h) {
           var r;
           if (h.url || fallback) { r = el('a', 'sa-name'); book(r, h, 'name'); }
@@ -3053,10 +3062,21 @@
               zoom(a, h); $('saFrame').scrollIntoView({ block: 'center', behavior: still ? 'auto' : 'smooth' });
             });
           }
+          if (top.indexOf(h) === -1) r.classList.add('xtra');
           r.setAttribute('data-h', h.id); r.appendChild(el('span', '', h.name)); if (h.url) r.appendChild(el('i', '', '↗'));
           r.addEventListener('mouseenter', function () { pick(h.id); }); r.addEventListener('focus', function () { pick(h.id); });
           box.appendChild(r);
         });
+        if (top.length < hs.length) {
+          var n = hs.length - top.length, mb = btn('sa-plus', '+ ' + n + ' more');
+          mb.setAttribute('aria-expanded', 'false');
+          mb.onclick = function () {
+            var open = !box.classList.contains('all'); cls(box, 'all', open); mb.setAttribute('aria-expanded', open);
+            mb.textContent = open ? 'Show fewer' : '+ ' + n + ' more'; leaders();
+            if (open) track('section_expand', 'stay-area-' + a.id);
+          };
+          box.appendChild(mb);
+        }
         $(a.side === 'l' ? 'saL' : 'saR').appendChild(box);
       });
       var more = $('saMore'), label = 'See all ' + H.length + ' hotels by name'; more.textContent = label;
@@ -3157,7 +3177,8 @@
       if (st.area && map) unzoom();
       if (n.length && !fits(by[st.on])) pick(n.slice().sort(best)[0].id);
       if (st.mode === 'grid') buildGrid();
-      paint();
+      cls(wrap, 'sa-filtered', st.mood !== 'all' || st.shore !== 'all');
+      paint(); leaders();
       $('saAsk').href = wa('Hi Moris Diaries! Can you help us pick a hotel?' + (st.mood !== 'all' ? ' We’re ' + $('saMood').selectedOptions[0].textContent + '.' : '') + (st.shore !== 'all' ? ' We’d like ' + $('saShore').selectedOptions[0].textContent : ''));
     }
     function mode(m, quiet) {
