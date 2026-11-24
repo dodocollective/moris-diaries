@@ -1061,6 +1061,11 @@
   .flights-cta { font-size: 12.5px; font-weight: 600; color: var(--clay); white-space: nowrap; }
   .flights-bar[aria-expanded="true"] .flights-cta { color: var(--stone); }
   .flights-widget { margin-top: 12px; border-radius: 8px; overflow: hidden; }
+  .flights-wrap + .transfers-wrap { margin-top: -36px; }
+  .transfers-wrap { scroll-margin-top: 16px; }
+  #transfersWidget { background: #F4F4F4; min-height: 300px; }
+  .transfers-fine { margin: 8px 0 0; font-size: 11.5px; color: var(--stone); text-align: center; }
+  @media (max-width: 640px) { #transfersWidget { margin-left: -12px; margin-right: -12px; } }
 
   /* Online car prices (Localrent) — the list is very long, so it's cut until asked for.
      clip, not hidden: the widget scrolls the page itself, never an inner box. */
@@ -1849,6 +1854,7 @@
     <nav class="jump-chips" aria-label="Jump to">
       <a href="#picks">⭐ Our Picks</a>
       <a href="#flights">✈️ Flights</a>
+      <a href="#transfers">🚕 Transfers</a>
       <a href="#where-to-stay">🏨 Where to Stay</a>
       <a href="#activities">🌊 Activities</a>
       <a href="#sun-to-late">🌅 Sun to Late</a>
@@ -2060,6 +2066,20 @@
       <span class="flights-cta">Search flights →</span>
     </button>
     <div class="flights-widget" id="flightsWidget" hidden></div>
+  </div>
+
+  <!-- Airport transfers (Kiwitaxi, via Travelpayouts) — loads the first time it opens, already
+       set to leave from Mauritius Airport so the popular routes and prices show straight away -->
+  <div class="flights-wrap transfers-wrap" id="transfers">
+    <button type="button" class="flights-bar" id="transfersOpen" aria-expanded="false" aria-controls="transfersBox">
+      <span class="flights-icon" aria-hidden="true">🚕</span>
+      <span class="flights-text"><b>Airport transfers</b><small>A private driver from MRU to your hotel, with Kiwitaxi</small></span>
+      <span class="flights-cta">See prices →</span>
+    </button>
+    <div id="transfersBox" hidden>
+      <div class="flights-widget" id="transfersWidget"></div>
+      <p class="transfers-fine">Booked with our partner Kiwitaxi. We may earn a small commission, at no extra cost to you.</p>
+    </div>
   </div>
 
   <!-- Travel deals — Travelpayouts promo links from Supabase `web_deals`; each shows only
@@ -2351,16 +2371,71 @@
       link.addEventListener('click', function () { toggleFlights(true, 'link'); });
     });
 
+    // Airport transfers: the same, with Kiwitaxi's widget. It resizes itself.
+    var trBtn = document.getElementById('transfersOpen');
+    var trBox = document.getElementById('transfersBox');
+    function toggleTransfers(forceOpen, source) {
+      if (!trBtn || !trBox) return;
+      if (!trBox.hidden) {
+        if (forceOpen) return;
+        trBox.hidden = true;
+        trBtn.setAttribute('aria-expanded', 'false');
+        trBtn.querySelector('.flights-cta').textContent = 'See prices →';
+        window.trackEvent('section_collapse', 'transfers');
+        return;
+      }
+      var slot = document.getElementById('transfersWidget');
+      trBox.hidden = false;
+      if (!slot.firstChild) {
+        var js = document.createElement('script');
+        js.async = true;
+        js.charset = 'utf-8';
+        js.src = 'https://tpwgts.com/content?currency=EUR&trs=585404&shmarker=702473&locale=en&country=Mauritius&from=Mauritius%20Airport&powered_by=true&transfer_options_limit=10&transfer_options=MCR&disable_currency_selector=true&hide_form_extras=true&hide_external_links=true&campaign_id=1&promo_id=3879';
+        js.onerror = function () { window.trackEvent('transfer_widget_error', 'Kiwitaxi'); };
+        slot.appendChild(js);
+      }
+      trBtn.setAttribute('aria-expanded', 'true');
+      trBtn.querySelector('.flights-cta').textContent = 'Hide';
+      window.trackEvent('section_expand', 'transfers', { source: source, partner: 'Kiwitaxi' });
+    }
+    if (trBtn) trBtn.addEventListener('click', function () { toggleTransfers(false, 'button'); });
+    document.querySelectorAll('a[href="#transfers"]').forEach(function (link) {
+      link.addEventListener('click', function () { toggleTransfers(true, 'link'); });
+    });
+    // Kiwitaxi tells the page which route and car class are showing (never who is travelling).
+    var trTo = null, trBy = null;
+    window.addEventListener('message', function (e) {
+      if (!/^https:\/\/([a-z0-9-]+\.)*kiwitaxi\.com$/.test(e.origin)) return;
+      var m = e.data;
+      if (typeof m === 'string') { if (m.charAt(0) !== '{') return; try { m = JSON.parse(m); } catch (err) { return; } }
+      if (!m || m.type !== 'change-parameters' || !m.data) return;
+      var d = m.data, to = d.to ? String(d.to).slice(0, 60) : null, by = d.by ? String(d.by).slice(0, 40) : null;
+      var meta = { partner: 'Kiwitaxi', from: d.from ? String(d.from).slice(0, 60) : null, to: to };
+      if (to && to !== trTo) window.trackEvent('transfer_route', to, meta);
+      if (by && (by !== trBy || to !== trTo)) window.trackEvent('transfer_select', by, meta);
+      trTo = to; trBy = by;
+    });
+    if (trBtn && 'IntersectionObserver' in window) {
+      var trSeen = new IntersectionObserver(function (es) {
+        if (es[0].isIntersecting) { window.trackEvent('section_view', 'transfers'); trSeen.disconnect(); }
+      }, { threshold: 0.6 });
+      trSeen.observe(trBtn);
+    }
+
     // Kiwi's flight widget is a cross-origin iframe, so clicks inside it can't be seen
     // directly. The page losing focus to it means someone started using it; log it once
     // per page view.
-    var flightsLogged = false;
+    var flightsLogged = false, transfersLogged = false;
     window.addEventListener('blur', function () {
       var el = document.activeElement;
       if (!el || el.tagName !== 'IFRAME' || !el.closest) return;
       if (!flightsLogged && el.closest('#flights')) {
         flightsLogged = true;
         window.trackEvent('flight_widget', 'Kiwi.com', { partner: 'Kiwi.com' });
+      }
+      if (!transfersLogged && el.closest('#transfers')) {
+        transfersLogged = true;
+        window.trackEvent('transfer_widget', 'Kiwitaxi', { partner: 'Kiwitaxi' });
       }
     });
 
