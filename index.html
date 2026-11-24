@@ -1115,6 +1115,8 @@
   .sa-bub .t { font: 600 190px 'Inter', sans-serif; fill: var(--sand); paint-order: stroke; stroke: var(--ink); stroke-width: 46px; stroke-opacity: 0.75; stroke-linejoin: round; }
   .sa-bub line { stroke: var(--tint); stroke-opacity: 0.6; stroke-width: 14; }
   .sa-bub.off { opacity: 0.25; }
+  .stay-wrap .sa-bub:focus { outline: none; }
+  .sa-bub:focus-visible circle:not(.hit) { stroke: var(--sand); stroke-width: 44px; }
   .sa-zoom .sa-bub, .sa-zoom .sa-grat, .sa-zoom .sa-mark { opacity: 0; pointer-events: none; }
   .sa-back { position: absolute; left: 20px; top: 8px; z-index: 5; background: var(--ink); border: 1px solid var(--hair); border-radius: 999px; padding: 10px 15px; font: 600 13px 'Inter', sans-serif; color: var(--sand); cursor: pointer; }
   .sa-hint { position: absolute; left: 0; right: 0; bottom: 0; text-align: center; font-size: 13px; color: var(--muted); pointer-events: none; }
@@ -1131,6 +1133,27 @@
   .sa-tog { text-transform: inherit; letter-spacing: inherit; }
   .sa-tog i { display: none; }
   .sa-inland { display: none; }
+
+  /* hotel names by coast, under the map (phones) */
+  .sa-rail { display: flex; align-items: flex-start; gap: 10px; margin: 14px -20px 0; padding: 0 20px 4px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding: 0 20px; scrollbar-width: none; }
+  .sa-rail::-webkit-scrollbar { display: none; }
+  .sa-rc { position: relative; flex: 0 0 min(84%, 330px); scroll-snap-align: start; padding: 11px 14px 4px; border-radius: 8px; background: var(--ink-2); box-shadow: inset 0 0 0 1px var(--hair), inset 0 3px 0 var(--tint); }
+  .sa-rc h3 { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin: 0; font: 600 11.5px 'Inter', sans-serif; letter-spacing: 0.1em; text-transform: uppercase; color: var(--tint); }
+  .sa-rc h3 span { font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--muted); }
+  .sa-rr { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 54px; padding: 7px 0; border-top: 1px solid var(--hair); color: var(--sand); text-decoration: none; }
+  .sa-rc h3 + .sa-rr { border-top: 0; }
+  .sa-rr > span { min-width: 0; }
+  .sa-rr b { display: block; font: 400 17.5px/1.2 'Fraunces', serif; }
+  .sa-rr small { display: block; margin-top: 2px; font-size: 11.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sa-rr i { flex: none; padding: 8px 11px; border-radius: 4px; border: 1px solid var(--clay); background: var(--clay); color: #fff; font: 600 12.5px/1 'Inter', sans-serif; }
+  .sa-rr i.alt { background: none; border-color: rgba(245,240,230,0.28); color: var(--sand); }
+  .sa-rr:active b { color: var(--clay-hi); }
+  .sa-rm { width: 100%; min-height: 44px; border-top: 1px solid var(--hair); text-align: center; font: 600 13px 'Inter', sans-serif; color: var(--clay-hi); }
+  .sa-bub.cur circle:not(.hit) { fill: var(--tint); }
+  .sa-bub.cur .n { fill: var(--ink); }
+  .sa-lab { cursor: pointer; }
+  .sa-lab text { font-family: 'Inter', sans-serif; font-weight: 600; fill: var(--sand); paint-order: stroke; stroke: var(--ink); stroke-opacity: 0.85; stroke-linejoin: round; }
+  .sa-lab.on text { fill: var(--clay-hi); }
 
   /* popup over the map (phones) */
   .sa-pop { position: absolute; left: 12px; right: 12px; bottom: 0; z-index: 6; background: var(--ink); border-radius: 10px; box-shadow: 0 -10px 50px rgba(0,0,0,0.6), inset 0 0 0 1px var(--hair); animation: sa-up 0.32s cubic-bezier(.2,.8,.2,1); }
@@ -1206,7 +1229,7 @@
     .sa-leaders path.off { stroke-opacity: 0.07; }
     .sa-frame { margin: 0; overflow: visible; align-self: center; }
     .sa-frame > svg { aspect-ratio: 5720 / 6320; overflow: visible; }
-    .sa-bub, .sa-hint, .sa-back, .sa-more, .sa-pop { display: none !important; }
+    .sa-bub, .sa-hint, .sa-back, .sa-rail, .sa-more, .sa-pop, .sa-lab { display: none !important; }
     .sa-names, .sa-names.open { display: flex; flex-direction: column; justify-content: space-between; gap: 9px; position: relative; z-index: 3; padding: 0; min-width: 0; }
     .sa-names.l { order: -1; text-align: right; }
     .sa-area { margin: 0; }
@@ -1960,6 +1983,7 @@
     <div class="sa-atlas" id="saMap">
       <svg class="sa-leaders" id="saLeaders" aria-hidden="true"></svg>
       <div class="sa-frame" id="saFrame"><button type="button" class="sa-back" id="saBack" hidden>← Whole island</button><div class="sa-inland" id="saInland"></div><p class="sa-hint" id="saHint">Tap a coast to see its hotels</p><div class="sa-pop" id="saPop" hidden></div></div>
+      <div class="sa-rail" id="saRail" role="group" aria-label="Hotels by coast"></div>
       <button type="button" class="sa-more" id="saMore" aria-expanded="false"></button>
       <div class="sa-names l" id="saL"></div>
       <div class="sa-names r" id="saR"></div>
@@ -3093,14 +3117,36 @@
       });
     }
     function fly(to) {
-      cancelAnimationFrame(raf);
-      if (still) return setView(to);
+      cancelAnimationFrame(raf); flying = true; labels();
+      if (still) { flying = false; setView(to); return labels(); }
       var from = view.slice(), t0 = null;
       raf = requestAnimationFrame(function step(t) {
         if (t0 === null) t0 = t;
         var k = Math.min(1, (t - t0) / 650), e = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
         setView(from.map(function (f, i) { return f + (to[i] - f) * e; }));
-        if (k < 1) raf = requestAnimationFrame(step);
+        if (k < 1) raf = requestAnimationFrame(step); else { flying = false; labels(); }
+      });
+    }
+    // Phones, zoomed in: hotel names beside their pins wherever there's room, best first.
+    var flying = false;
+    function labels() {
+      [].forEach.call(map.querySelectorAll('.sa-lab'), function (g) { g.remove(); });
+      if (flying || !small.matches || !st.area) return;
+      var W = map.clientWidth, Ht = map.clientHeight, u = view[2] / W, pop = $('saPop'), floor = pop.hidden ? Ht : Ht - pop.offsetHeight - 4;
+      var hs = inArea(st.area), busy = [[12, 0, 168, 54]];
+      function at(h) { return [(h.x - view[0]) / u, (h.y - view[1]) / u]; }
+      hs.forEach(function (h) { var q = at(h); busy.push([q[0] - 9, q[1] - 9, q[0] + 9, q[1] + 9]); });
+      hs.slice().sort(function (a, b) { return (b.id === st.on) - (a.id === st.on) || best(a, b); }).forEach(function (h) {
+        var q = at(h), g = sv('g', { class: 'sa-lab' + (h.id === st.on ? ' on' : '') }, map);
+        var t = sv('text', { 'font-size': 12.5 * u, 'stroke-width': 4 * u }, g); t.textContent = h.name;
+        var w = t.getComputedTextLength() / u;
+        var gap = h.id === st.on ? 23 : 14, put = [[q[0] + gap, q[1] - 8], [q[0] - gap - w, q[1] - 8], [q[0] - w / 2, q[1] - 29], [q[0] - w / 2, q[1] + 13], [q[0] + 8, q[1] - 26], [q[0] + 8, q[1] + 10], [q[0] - 8 - w, q[1] - 26], [q[0] - 8 - w, q[1] + 10]].filter(function (o) {
+          return o[0] > 6 && o[0] + w < W - 6 && o[1] > 4 && o[1] + 16 < floor && !busy.some(function (r) { return o[0] < r[2] && o[0] + w > r[0] && o[1] < r[3] && o[1] + 16 > r[1]; });
+        })[0];
+        if (!put) return g.remove();
+        busy.push([put[0] - 4, put[1], put[0] + w + 4, put[1] + 16]);
+        t.setAttribute('x', view[0] + put[0] * u); t.setAttribute('y', view[1] + (put[1] + 12.5) * u);
+        g.addEventListener('click', function (e) { e.stopPropagation(); popup(h, 'label'); });
       });
     }
     function zoom(a, h) {
@@ -3129,13 +3175,63 @@
         b.onclick = function () { step(k[1]); var again = p.querySelector('[aria-label="' + k[2] + '"]'); if (again) again.focus({ preventScroll: true }); };
         bar.appendChild(b);
       });
-      var x = btn('', '×'); x.setAttribute('aria-label', 'Close'); x.onclick = function () { p.hidden = true; }; bar.appendChild(x);
+      var x = btn('', '×'); x.setAttribute('aria-label', 'Close'); x.onclick = function () { p.hidden = true; labels(); }; bar.appendChild(x);
       p.appendChild(bar); p.appendChild(card(h, 'card'));
       var sx = null;
       p.ontouchstart = function (e) { sx = e.touches[0].clientX; };
       p.ontouchend = function (e) { if (sx === null || hs.length < 2) return; var d = e.changedTouches[0].clientX - sx; sx = null; if (Math.abs(d) > 50) { e.preventDefault(); step(d < 0 ? 1 : -1); } };
       track('stay_select', h.name, { slug: h.id, from: how });
-      setView(view); paint();
+      setView(view); paint(); labels(); railTo(h.area);
+    }
+    // Phones: hotel names under the map, one card per coast, in order around the island. Every
+    // name is its booking link. Swiping lights that coast on the map; opening a coast moves here.
+    var ROUND = ['grand-baie', 'trou-aux-biches', 'balaclava', 'port-louis', 'albion', 'flic-en-flac', 'tamarin', 'chamarel', 'le-morne', 'bel-ombre', 'savanne', 'blue-bay', 'beau-champ', 'trou-deau-douce', 'belle-mare', 'poste-lafayette', 'far-north'];
+    var RAIL = 3, railAt = null, railSeen = {}, railTimer;
+    function buildRail() {
+      var R = $('saRail'); R.textContent = ''; R.scrollLeft = 0; railAt = null;
+      AREAS.slice().sort(function (a, b) { return ROUND.indexOf(a.id) - ROUND.indexOf(b.id); }).forEach(function (a) {
+        var hs = inArea(a).sort(best); if (!hs.length) return;
+        var c = tint(el('section', 'sa-rc'), a.shore), h3 = el('h3', '', a.label);
+        c.setAttribute('data-a', a.id); h3.appendChild(el('span', '', hs.length + (hs.length === 1 ? ' hotel' : ' hotels'))); c.appendChild(h3);
+        var cap = hs.length > RAIL + 1 ? RAIL : hs.length;
+        function row(h) {
+          var r = el('a', 'sa-rr'), t = book(r, h, 'rail'), sp = el('span');
+          sp.appendChild(el('b', '', h.name));
+          var f = h.moods.map(function (m) { return MOOD_SHORT[m]; }).filter(Boolean).join(' · '); if (f) sp.appendChild(el('small', '', f));
+          r.appendChild(sp); r.appendChild(el('i', t.channel === 'link' ? '' : 'alt', t.channel === 'link' ? 'Prices' : t.channel === 'fallback' ? 'Search' : 'Ask us'));
+          return r;
+        }
+        hs.slice(0, cap).forEach(function (h) { c.appendChild(row(h)); });
+        if (cap < hs.length) {
+          var m = btn('sa-rm', 'Show all ' + hs.length);
+          m.onclick = function () {
+            track('section_expand', 'stay-rail-' + a.id, { count: hs.length });
+            hs.slice(cap).forEach(function (h) { c.insertBefore(row(h), m); });
+            var first = c.querySelectorAll('.sa-rr')[cap]; m.remove(); first.focus({ preventScroll: true });
+          };
+          c.appendChild(m);
+        }
+        R.appendChild(c);
+      });
+      R.onscroll = function () { clearTimeout(railTimer); railTimer = setTimeout(railSettle, 140); };
+      railMark();
+    }
+    function railMark() {
+      var R = $('saRail'), x = R.getBoundingClientRect().left + 20, d = 1e9, end = R.scrollLeft > 4 && R.scrollLeft + R.clientWidth >= R.scrollWidth - 4;
+      railAt = null;
+      if (end && R.lastChild) railAt = R.lastChild.getAttribute('data-a');
+      else [].forEach.call(R.children, function (c) { var k = Math.abs(c.getBoundingClientRect().left - x); if (k < d) { d = k; railAt = c.getAttribute('data-a'); } });
+      AREAS.forEach(function (a) { cls(bubs[a.id], 'cur', a.id === railAt); });
+    }
+    function railSettle() {
+      railMark();
+      if (st.area && railAt && st.area.id !== railAt) unzoom();
+      if (railAt && !railSeen[railAt]) { railSeen[railAt] = 1; track('stay_swipe', railAt, { mood: st.mood, shore: st.shore }); }
+    }
+    function railTo(a) {
+      var R = $('saRail'), c = R.querySelector('[data-a="' + a.id + '"]');
+      if (!c || !small.matches || railAt === a.id) return;
+      railSeen[a.id] = 1; R.scrollTo({ left: R.scrollLeft + c.getBoundingClientRect().left - R.getBoundingClientRect().left - 20, behavior: still ? 'auto' : 'smooth' });
     }
     function buildNames() {
       AREAS.forEach(function (a) {
@@ -3278,6 +3374,7 @@
       if (n.length && !fits(by[st.on])) pick(n.slice().sort(best)[0].id);
       if (st.mode === 'grid') buildGrid();
       paint(); openArea.l = openArea.r = null; listNames();
+      if (map) buildRail();
       $('saAsk').href = wa('Hi Moris Diaries! Can you help us pick a hotel?' + (st.mood !== 'all' ? ' We’re ' + $('saMood').selectedOptions[0].textContent + '.' : '') + (st.shore !== 'all' ? ' We’d like ' + $('saShore').selectedOptions[0].textContent : ''));
     }
     function mode(m, quiet) {
