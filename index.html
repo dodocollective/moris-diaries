@@ -1151,9 +1151,10 @@
   .sa-rm { width: 100%; min-height: 44px; border-top: 1px solid var(--hair); text-align: center; font: 600 13px 'Inter', sans-serif; color: var(--clay-hi); }
   .sa-bub.cur circle:not(.hit) { fill: var(--tint); }
   .sa-bub.cur .n { fill: var(--ink); }
-  .sa-lab { cursor: pointer; }
-  .sa-lab text { font-family: 'Inter', sans-serif; font-weight: 600; fill: var(--sand); paint-order: stroke; stroke: var(--ink); stroke-opacity: 0.85; stroke-linejoin: round; }
-  .sa-lab.on text { fill: var(--clay-hi); }
+  .sa-lab { position: absolute; z-index: 4; padding: 3px 5px; font: 600 13px/17px 'Inter', sans-serif; color: var(--sand); text-decoration: none; white-space: nowrap; text-shadow: 0 0 3px var(--ink), 0 0 3px var(--ink), 0 1px 5px var(--ink); }
+  .sa-fan { stroke: var(--sand); stroke-opacity: 0.45; pointer-events: none; }
+  .sa-lab i { font-style: normal; color: var(--clay-hi); margin-left: 4px; }
+  .sa-lab:active, .sa-lab.on { color: var(--clay-hi); }
 
   /* popup over the map (phones) */
   .sa-pop { position: absolute; left: 12px; right: 12px; bottom: 0; z-index: 6; background: var(--ink); border-radius: 10px; box-shadow: 0 -10px 50px rgba(0,0,0,0.6), inset 0 0 0 1px var(--hair); animation: sa-up 0.32s cubic-bezier(.2,.8,.2,1); }
@@ -3010,7 +3011,7 @@
       var t = target(h);
       a.href = t.href; a.target = '_blank'; a.rel = t.channel === 'whatsapp' ? 'noopener' : 'noopener sponsored';
       a.addEventListener('click', function () {
-        track('hotel_click', h.name, { partner: t.partner, channel: t.channel, slug: h.id, area: h.area.id, region: h.area.shore, view: st.mode, from: from, mood: st.mood, shore: st.shore });
+        track('hotel_click', h.name, { partner: t.partner, channel: t.channel, slug: h.id, area: h.area.id, region: h.area.shore, view: st.mode, from: typeof from === 'function' ? from() : from, mood: st.mood, shore: st.shore });
       });
       return t;
     }
@@ -3101,17 +3102,20 @@
         var m = map.getScreenCTM(), near = null, bd = small.matches ? 32 : 14;
         H.forEach(function (h) { if (!fits(h)) return; var d = Math.hypot(m.a * h.x + m.e - e.clientX, m.d * h.y + m.f - e.clientY); if (d < bd) { bd = d; near = h; } });
         if (!near) return;
-        if (small.matches) { st.area = near.area; popup(near, 'pin'); } else { pick(near.id); track('stay_select', near.name, { slug: near.id, from: 'pin' }); }
+        // Phones: a named, linked pin goes straight to its prices; any other shows its card.
+        if (small.matches) { var lab = $('saFrame').querySelector('a.sa-lab[data-h="' + near.id + '"]'); if (lab) { viaPin = true; lab.click(); viaPin = false; } else { st.area = near.area; popup(near, 'pin'); } } else { pick(near.id); track('stay_select', near.name, { slug: near.id, from: 'pin' }); }
       });
       $('saFrame').insertBefore(map, $('saFrame').firstChild);
       setView(full());
     }
+    // Highlighted: on phones only while its card is up.
+    function shown(h) { return h.id === st.on && (!small.matches || (!!st.area && !$('saPop').hidden)); }
     function setView(v) {
       view = v; map.setAttribute('viewBox', v.join(' '));
       var u = v[2] / (map.clientWidth || 600), zoomed = !!st.area, phone = small.matches;
       parts.edge.setAttribute('stroke-width', 1.3 * u); parts.beach.setAttribute('stroke-width', 2 * u);
       H.forEach(function (h) {
-        var c = pins[h.id].children, px = phone ? (zoomed ? 8 : 2.6) : 5.2, on = h.id === st.on && (!phone || zoomed);
+        var c = pins[h.id].children, px = phone ? (zoomed ? 8 : 2.6) : 5.2, on = shown(h);
         c[0].setAttribute('r', 13 * u); c[1].setAttribute('r', (px + 8) * u); c[1].setAttribute('stroke-width', 2.2 * u);
         c[2].setAttribute('r', (on ? px * 1.4 : px) * u); c[2].setAttribute('stroke-width', (phone && !zoomed ? 1 : 1.8) * u);
       });
@@ -3127,40 +3131,61 @@
         if (k < 1) raf = requestAnimationFrame(step); else { flying = false; labels(); }
       });
     }
-    // Phones, zoomed in: hotel names beside their pins wherever there's room, best first.
-    var flying = false;
+    // Phones, zoomed in: hotel names beside their pins wherever there's room, best first. A name
+    // with a booking link is that link (hotel_click); one without opens the hotel's card.
+    var flying = false, viaPin = false;
     function labels() {
-      [].forEach.call(map.querySelectorAll('.sa-lab'), function (g) { g.remove(); });
-      if (flying || !small.matches || !st.area) return;
-      var W = map.clientWidth, Ht = map.clientHeight, u = view[2] / W, pop = $('saPop'), floor = pop.hidden ? Ht : Ht - pop.offsetHeight - 4;
+      var F = $('saFrame');
+      [].forEach.call(wrap.querySelectorAll('.sa-lab, .sa-fan'), function (g) { g.remove(); });
+      if (!map || flying || !small.matches || !st.area || st.mode !== 'map') return;
+      var W = map.clientWidth, Ht = map.clientHeight, u = view[2] / W, pop = $('saPop'), floor = pop.hidden ? Ht - 24 : Ht - pop.offsetHeight - 4;
       var hs = inArea(st.area), busy = [[12, 0, 168, 54]];
       function at(h) { return [(h.x - view[0]) / u, (h.y - view[1]) / u]; }
-      hs.forEach(function (h) { var q = at(h); busy.push([q[0] - 9, q[1] - 9, q[0] + 9, q[1] + 9]); });
-      hs.slice().sort(function (a, b) { return (b.id === st.on) - (a.id === st.on) || best(a, b); }).forEach(function (h) {
-        var q = at(h), g = sv('g', { class: 'sa-lab' + (h.id === st.on ? ' on' : '') }, map);
-        var t = sv('text', { 'font-size': 12.5 * u, 'stroke-width': 4 * u }, g); t.textContent = h.name;
-        var w = t.getComputedTextLength() / u;
-        var gap = h.id === st.on ? 23 : 14, put = [[q[0] + gap, q[1] - 8], [q[0] - gap - w, q[1] - 8], [q[0] - w / 2, q[1] - 29], [q[0] - w / 2, q[1] + 13], [q[0] + 8, q[1] - 26], [q[0] + 8, q[1] + 10], [q[0] - 8 - w, q[1] - 26], [q[0] - 8 - w, q[1] + 10]].filter(function (o) {
-          return o[0] > 6 && o[0] + w < W - 6 && o[1] > 4 && o[1] + 16 < floor && !busy.some(function (r) { return o[0] < r[2] && o[0] + w > r[0] && o[1] < r[3] && o[1] + 16 > r[1]; });
+      hs.forEach(function (h) { var q = at(h); busy.push([q[0] - 8, q[1] - 8, q[0] + 8, q[1] + 8]); });
+      // First beside the pin; whatever's left over then fans out from it on a short line.
+      var left = hs.slice().sort(function (a, b) { return shown(b) - shown(a) || best(a, b); }).filter(function (h) { return !place(h); });
+      left.sort(function (a, b) { return a.y - b.y; }).forEach(function (h) { place(h, true); });
+      function place(h, fan) {
+        var q = at(h), me = shown(h), g;
+        if (h.url) { g = el('a', 'sa-lab'); book(g, h, function () { return viaPin ? 'pin' : 'label'; }); }
+        else { g = btn('sa-lab'); g.onclick = function () { popup(h, 'label'); }; }
+        g.setAttribute('data-h', h.id); cls(g, 'on', me); g.appendChild(document.createTextNode(h.name)); if (h.url) g.appendChild(el('i', '', '↗'));
+        F.appendChild(g);
+        var w = g.offsetWidth, gap = me ? 18 : 9, H2 = 23, x = q[0], y = q[1];
+        var spots = [[x + gap, y - 11.5], [x - gap - w, y - 11.5], [x + gap - 2, y - 25], [x + gap - 2, y + 2], [x - gap + 2 - w, y - 25], [x - gap + 2 - w, y + 2], [x - w / 2, y - 33], [x - w / 2, y + 10]];
+        if (fan) {
+          spots = [];
+          [26, 48, 70, 94].forEach(function (dx) { [-12, 12, -24, 24, -38, 38, -54, 54, -72, 72, -92, 92].forEach(function (dy) { spots.push([x + dx, y + dy - 11.5], [x - dx - w, y + dy - 11.5]); }); });
+          spots.sort(function (a, b) { return far(a) - far(b); });
+        }
+        function far(o) { return Math.hypot(o[0] > x ? o[0] - x : x - o[0] - w, o[1] + 11.5 - y); }
+        var put = spots.filter(function (o) {
+          return o[0] > 2 && o[0] + w < W - 2 && o[1] > 2 && o[1] + H2 < floor && !busy.some(function (r) { return o[0] < r[2] && o[0] + w > r[0] && o[1] + 2 < r[3] && o[1] + H2 - 2 > r[1]; });
         })[0];
-        if (!put) return g.remove();
-        busy.push([put[0] - 4, put[1], put[0] + w + 4, put[1] + 16]);
-        t.setAttribute('x', view[0] + put[0] * u); t.setAttribute('y', view[1] + (put[1] + 12.5) * u);
-        g.addEventListener('click', function (e) { e.stopPropagation(); popup(h, 'label'); });
-      });
+        if (!put) { g.remove(); return false; }
+        busy.push([put[0], put[1], put[0] + w, put[1] + H2]);
+        g.style.left = put[0] + 'px'; g.style.top = put[1] + 'px';
+        if (fan) map.insertBefore(sv('line', { class: 'sa-fan', x1: h.x, y1: h.y, x2: view[0] + (put[0] > x ? put[0] + 3 : put[0] + w - 3) * u, y2: view[1] + (put[1] + 11.5) * u, 'stroke-width': u }), pins[H[0].id]);
+        return true;
+      }
     }
     function zoom(a, h) {
       var hs = inArea(a); if (!hs.length) return;
-      st.area = a; cls(map, 'sa-zoom', true); $('saBack').hidden = false; $('saHint').hidden = true;
+      st.area = a; cls(map, 'sa-zoom', true); $('saBack').hidden = false;
       var xs = hs.map(function (q) { return q.x; }), ys = hs.map(function (q) { return q.y; });
       var x0 = Math.min.apply(0, xs), x1 = Math.max.apply(0, xs), y0 = Math.min.apply(0, ys), y1 = Math.max.apply(0, ys);
-      // the popup covers the lower half of the frame, so keep the pins in the upper half
-      var w = Math.max(620, (x1 - x0) * 1.7, (y1 - y0) * 2.6);
-      fly([(x0 + x1) / 2 - w / 2, (y0 + y1) / 2 - w * 1.16 * 0.36, w, w * 1.16]);
-      popup(h || hs.filter(function (q) { return q.id === st.on; })[0] || hs.slice().sort(best)[0], h ? 'name' : 'area');
+      $('saPop').hidden = true; $('saHint').textContent = 'Tap a hotel to see its prices'; railTo(a);
+      if (h) {
+        // its card covers the lower half of the frame, so keep the pins in the upper half
+        var w = Math.max(620, (x1 - x0) * 1.7, (y1 - y0) * 2.6);
+        fly([(x0 + x1) / 2 - w / 2, (y0 + y1) / 2 - w * 1.16 * 0.36, w, w * 1.16]);
+        return popup(h, 'name');
+      }
+      var v = Math.max(480, (x1 - x0) * 1.9, (y1 - y0) * 1.2);
+      fly([(x0 + x1) / 2 - v / 2, (y0 + y1) / 2 - v * 1.16 * 0.53, v, v * 1.16]); paint();
     }
     function unzoom() {
-      st.area = null; cls(map, 'sa-zoom', false); $('saBack').hidden = true; $('saHint').hidden = false; $('saPop').hidden = true;
+      st.area = null; cls(map, 'sa-zoom', false); $('saBack').hidden = true; $('saHint').textContent = 'Tap a coast to see its hotels'; $('saPop').hidden = true;
       fly(full()); paint();
     }
     function popup(h, how) {
@@ -3175,13 +3200,15 @@
         b.onclick = function () { step(k[1]); var again = p.querySelector('[aria-label="' + k[2] + '"]'); if (again) again.focus({ preventScroll: true }); };
         bar.appendChild(b);
       });
-      var x = btn('', '×'); x.setAttribute('aria-label', 'Close'); x.onclick = function () { p.hidden = true; labels(); }; bar.appendChild(x);
+      var x = btn('', '×'); x.setAttribute('aria-label', 'Close'); x.onclick = function () { p.hidden = true; setView(view); paint(); labels(); }; bar.appendChild(x);
       p.appendChild(bar); p.appendChild(card(h, 'card'));
       var sx = null;
       p.ontouchstart = function (e) { sx = e.touches[0].clientX; };
       p.ontouchend = function (e) { if (sx === null || hs.length < 2) return; var d = e.changedTouches[0].clientX - sx; sx = null; if (Math.abs(d) > 50) { e.preventDefault(); step(d < 0 ? 1 : -1); } };
       track('stay_select', h.name, { slug: h.id, from: how });
-      setView(view); paint(); labels(); railTo(h.area);
+      setView(view); paint(); railTo(h.area);
+      var u = view[2] / map.clientWidth, y = (h.y - view[1]) / u, low = map.clientHeight - p.offsetHeight - 40;
+      if (!flying && y > low) fly([view[0], view[1] + (y - low * 0.6) * u, view[2], view[3]]); else labels();
     }
     // Phones: hotel names under the map, one card per coast, in order around the island. Every
     // name is its booking link. Swiping lights that coast on the map; opening a coast moves here.
@@ -3282,6 +3309,7 @@
       leaders();
     }
     function leaders() {
+      labels();
       var L = $('saLeaders'); L.textContent = '';
       if (st.mode !== 'map' || small.matches || !map) return;
       var o = $('saMap').getBoundingClientRect(), m = map.getScreenCTM(); if (!m || !o.width) return;
@@ -3353,7 +3381,7 @@
     function paint() {
       var on = by[st.on];
       H.forEach(function (h) {
-        var off = !fits(h), me = h.id === st.on && (!small.matches || !!st.area), c = h.moods.indexOf(chap) > -1;
+        var off = !fits(h), me = shown(h), c = h.moods.indexOf(chap) > -1;
         cls(pins[h.id], 'on', me); cls(pins[h.id], 'off', off && !me); cls(gp[h.id], 'off', !c); cls(gp[h.id], 'on', h.id === st.on && c);
       });
       AREAS.forEach(function (a) { var g = bubs[a.id], n = inArea(a).length; if (!g) return; g.querySelector('.n').textContent = n; g.setAttribute('aria-label', a.label + ', ' + n + (n === 1 ? ' hotel' : ' hotels')); cls(g, 'off', !n); });
