@@ -1062,6 +1062,22 @@
   .flights-bar[aria-expanded="true"] .flights-cta { color: var(--stone); }
   .flights-widget { margin-top: 12px; border-radius: 8px; overflow: hidden; }
 
+  /* Online car prices (Localrent) — the list is very long, so it's cut until asked for.
+     clip, not hidden: the widget scrolls the page itself, never an inner box. */
+  .cars-bar { margin-top: 22px; scroll-margin-top: 16px; }
+  .cars-panel { position: relative; margin-top: 12px; padding: 14px; border-radius: 10px; background: #F3F1EC; color: #22302b; text-align: left; }
+  .cars-panel[hidden] { display: none; }
+  .cars-panel.cut .cars-widget { max-height: 1500px; overflow: hidden; overflow: clip; }
+  .cars-panel.cut::after { content: ''; position: absolute; left: 0; right: 0; bottom: 92px; height: 120px; background: linear-gradient(rgba(243,241,236,0), #F3F1EC); pointer-events: none; }
+  .cars-panel lr-whitelabel:not(:defined) { min-height: 320px !important; }
+  .cars-foot { position: relative; z-index: 1; display: flex; justify-content: center; gap: 10px; padding-top: 14px; }
+  .cars-foot button { min-height: 44px; padding: 0 18px; border-radius: 6px; border: 1px solid rgba(34,48,43,0.25); background: #fff; color: #22302b; font: 600 13.5px 'Inter', sans-serif; cursor: pointer; }
+  .cars-foot .all { background: var(--clay); border-color: var(--clay); color: #fff; }
+  .cars-foot [hidden] { display: none; }
+  .cars-fine { margin: 10px 0 0; text-align: center; font-size: 11.5px; line-height: 1.4; color: #5d6964; }
+  .cars-panel.short::after { display: none; }
+  @media (max-width: 640px) { .cars-panel { margin-left: -12px; margin-right: -12px; padding: 12px 10px; } }
+
   /* ================= WHERE TO STAY — ATLAS (Supabase `web_stays`) ================= */
 
   .stay-wrap {
@@ -1922,6 +1938,20 @@
     <div class="activities-filter" id="rentalFilter" role="tablist"></div>
     <div class="stay-scroll rental-scroll" id="rentalCards"></div>
     <button type="button" class="rental-any" id="rentalAny">Not sure which car? Tell us what you need →</button>
+
+    <!-- Localrent's booking widget (Travelpayouts); its script loads the first time this opens -->
+    <div class="cars-bar" id="carsBar">
+      <button type="button" class="flights-bar" id="carsOpen" aria-expanded="false" aria-controls="carsPanel">
+        <span class="flights-icon" aria-hidden="true">🚗</span>
+        <span class="flights-text"><b>Compare prices online</b><small>Pick your dates and book with Localrent</small></span>
+        <span class="flights-cta">See prices →</span>
+      </button>
+      <div class="cars-panel cut" id="carsPanel" hidden>
+        <div class="cars-widget" id="carsWidget"></div>
+        <div class="cars-foot"><button type="button" class="all" id="carsAll" hidden>Show all cars</button><button type="button" id="carsHide">Hide prices</button></div>
+        <p class="cars-fine">Booked with our partner Localrent. We may earn a small commission, at no extra cost to you.</p>
+      </div>
+    </div>
   </section>
 
   <dialog class="rental-sheet" id="rentalSheet" aria-labelledby="rentalSheetTitle">
@@ -3875,6 +3905,99 @@
       }, { threshold: 0.4 });
       io.observe(wrap);
     }
+  })();
+</script>
+
+<script>
+  // Online car prices — Localrent's widget (Travelpayouts), loaded on first open. It draws the
+  // list in the page and the booking steps over it, and keeps its place in the address bar
+  // (lr_car_id, lr_b_step), so a link with those reopens it. Events: section_expand (car-prices,
+  // and car-prices-all for the full list), car_widget (first use), car_widget_tap (a filter or
+  // control), car_offer_view (label = car), car_offer_step (booking / payment), car_offer_pay
+  // (the pay button), car_offer_close (step it was on). Nothing typed into the booking form is read.
+  (function () {
+    var SRC = 'https://tpwgts.com/content?trs=585404&shmarker=702473&locale=en&country=84&city=549191&powered_by=true&campaign_id=87&promo_id=2466';
+    var bar = document.getElementById('carsBar'), btn = document.getElementById('carsOpen'), panel = document.getElementById('carsPanel');
+    var box = document.getElementById('carsWidget'), all = document.getElementById('carsAll');
+    if (!btn || !panel) return;
+    var P = 'Localrent', used = false, lastCar = null, car = null, step = null;
+    function track(n, l, m) { if (window.trackEvent) window.trackEvent(n, l, m); }
+    function load() {
+      if (box.firstChild) return;
+      // On start the widget sends the page to the very top; keep the visitor where they are.
+      var to = window.scrollTo;
+      window.scrollTo = function (o) {
+        if (arguments.length === 1 && o && o.top === 0 && o.left === undefined) return;
+        return to.apply(window, arguments);
+      };
+      ['replaceState', 'pushState'].forEach(function (k) {
+        var f = history[k];
+        history[k] = function () { var r = f.apply(history, arguments); where(); return r; };
+      });
+      var js = document.createElement('script');
+      js.async = true; js.charset = 'utf-8'; js.src = SRC;
+      js.onerror = function () { box.textContent = 'Prices didn\u2019t load. Please try again in a moment, or reserve on WhatsApp above.'; track('car_widget_error', P); };
+      box.appendChild(js);
+      if ('ResizeObserver' in window) new ResizeObserver(function () {
+        var w = box.querySelector('lr-whitelabel');
+        all.hidden = !(panel.classList.contains('cut') && w && w.shadowRoot && w.offsetHeight > 1600);
+        if (w && w.shadowRoot && w.offsetHeight <= 1500) panel.classList.add('short'); else panel.classList.remove('short');
+      }).observe(box);
+      where();
+    }
+    // The address says which car is open and how far the booking has got.
+    function where() {
+      var q = new URLSearchParams(location.search), c = q.get('lr_car_id'), n = +q.get('lr_b_step') || 1;
+      if (c === car && n === step) return;
+      if (c && c !== car) track('car_offer_view', lastCar || c, { partner: P, car_id: c, from: (q.get('lr_pickup_date') || '').slice(0, 10), to: (q.get('lr_dropoff_date') || '').slice(0, 10), via: used ? 'widget' : 'address' });
+      if (c && n > 1 && (n !== step || c !== car)) track('car_offer_step', n === 2 ? 'booking' : n === 3 ? 'payment' : 'step ' + n, { partner: P, car_id: c, car: lastCar });
+      if (car && !c) track('car_offer_close', lastCar || car, { partner: P, car_id: car, step: step });
+      car = c; step = n;
+    }
+    function open(how) {
+      load();
+      if (!panel.hidden) return;
+      panel.hidden = false;
+      btn.setAttribute('aria-expanded', 'true'); btn.querySelector('.flights-cta').textContent = 'Hide';
+      track('section_expand', 'car-prices', { source: how, partner: P });
+    }
+    function close(how) {
+      panel.hidden = true; panel.classList.add('cut');
+      btn.setAttribute('aria-expanded', 'false'); btn.querySelector('.flights-cta').textContent = 'See prices →';
+      track('section_collapse', 'car-prices', { source: how });
+      if (how === 'bottom') { bar.scrollIntoView(); btn.focus({ preventScroll: true }); }
+    }
+    btn.addEventListener('click', function () { if (panel.hidden) open('button'); else close('button'); });
+    document.getElementById('carsHide').addEventListener('click', function () { close('bottom'); });
+    all.addEventListener('click', function () { panel.classList.remove('cut'); all.hidden = true; track('section_expand', 'car-prices-all', { partner: P }); });
+
+    // Taps inside the widget. A car's name is the first line of its card that isn't a badge or price.
+    var NOT = /\u20AC|[$£]|^for \d+ day|^a day$|^(view|compare|or similar|no deposit|new car|unlimited mileage|instant booking|automatic|manual|no credit card|cash deposit possible|free cancell?ation)$/i;
+    function leaves(n) {
+      return [].filter.call(n.querySelectorAll('*'), function (e) { return !e.children.length && !/^(style|script)$/i.test(e.tagName) && e.textContent.trim(); }).map(function (e) { return e.textContent.trim(); });
+    }
+    document.addEventListener('click', function (e) {
+      var path = e.composedPath ? e.composedPath() : [], host = e.target;
+      if (!host || !/^LR-WHITELABEL/.test(host.tagName)) return;
+      if (!used) { used = true; track('car_widget', P, { partner: P }); }
+      var b = path.filter(function (n) { return n.tagName === 'BUTTON'; })[0], txt = b ? b.textContent.trim() : '';
+      if (/^pay\b/i.test(txt)) return track('car_offer_pay', txt.slice(0, 30), { partner: P, car_id: car, car: lastCar });
+      if (host.tagName !== 'LR-WHITELABEL') return;
+      for (var i = 0; i < path.length && path[i] !== host; i++) {
+        var n = path[i];
+        if (n.nodeType !== 1 || n.id === 'lr-app-root') continue;
+        if ((n.textContent.match(/\u20AC/g) || []).length > 12 || n.textContent.length > 600) break;
+        if (!/\u20AC/.test(n.textContent)) continue;
+        var name = leaves(n).filter(function (t) { return !NOT.test(t) && t.length < 40; })[0];
+        if (name) { lastCar = name; break; }
+      }
+      if (b && (!txt || /^view$/i.test(txt))) return;
+      var label = txt;
+      if (!b) { var t = path[0]; for (var k = 0; k < 4 && t && t !== host && !label; k++) { if (t.textContent) { label = (leaves(t)[0] || t.textContent).trim(); } t = t.parentNode; } if (lastCar && label === lastCar) return; }
+      if (label && label.length < 40 && !/\u20AC/.test(label)) track('car_widget_tap', label, { partner: P });
+    }, true);
+
+    if (/[?&]lr_(car_id|b_step)=/.test(location.search)) open('address');
   })();
 </script>
 
