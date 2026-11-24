@@ -1206,8 +1206,12 @@
   .sa-shore header span { color: var(--muted); font-size: 14px; }
   .sa-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 12px; }
   .sa-lead { margin-bottom: 36px; }
-  .sa-gm { display: block; width: 100%; margin-top: 14px; padding: 12px; border: 1px solid var(--hair); border-radius: 4px; text-align: center; font: 600 13.5px 'Inter', sans-serif; color: var(--sand); }
-  .sa-gm:hover { border-color: var(--tint); color: var(--tint); }
+  .sa-gm { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 4px; min-height: 92px; padding: 14px; border: 1px solid var(--hair); border-radius: 6px; text-align: center; transition: border-color 0.2s; }
+  .sa-gm b { font: 400 25px/1.2 'Fraunces', serif; color: var(--clay-hi); }
+  .sa-gm span { font-size: 13px; color: var(--muted); }
+  .sa-gm:hover { border-color: var(--clay); }
+  .sa-gl { display: block; width: 100%; padding: 12px; border: 1px solid var(--hair); border-radius: 4px; text-align: center; font: 600 13.5px 'Inter', sans-serif; color: var(--sand); }
+  .sa-gl:hover { border-color: var(--clay); }
   .sa-tiles .sa-card { display: flex; flex-direction: column; background: var(--ink-2); border-radius: 6px; overflow: hidden; }
   .sa-tiles .sa-body { flex: 1; grid-template-rows: auto auto 1fr auto; padding: 10px 11px 12px; }
   .sa-tiles .sa-nm { font-size: 16.5px; }
@@ -3417,31 +3421,36 @@
         [].forEach.call($('saChaps').children, function (c) { io.observe(c); });
       }
     }
-    // Grid: hotels with photos first (topped up to full rows), then each shore with one row and a
-    // button for the rest. A filter that leaves few hotels lists them all.
-    var gridCols = 0;
+    // Grid: only the hotels with photos, then a tile that opens every other hotel, shore by shore.
+    // A filter with few photos tops up with its best others; one that leaves few hotels lists them all.
+    var gridCols = 0, gridAll = false;
     function cols() { return small.matches ? 2 : Math.max(2, Math.floor(($('saGrid').clientWidth + 18) / 223)); }
     function buildGrid() {
       var v = $('saGrid'), n = gridCols = cols(), all = H.filter(fits).sort(best); v.textContent = '';
       var pics = all.filter(function (h) { return h.photo; }), rest = all.filter(function (h) { return !h.photo; });
-      var lead = all.length <= Math.max(n * 3, 12) ? pics.concat(rest) : pics.concat(rest).slice(0, Math.max(1, Math.ceil(pics.length / n)) * n);
+      var few = all.length <= Math.max(n * 3, 12), least = Math.max(n * 2 - 1, 5);
+      var lead = pics.concat(few ? rest : rest.slice(0, Math.max(0, least - pics.length)));
       var top = el('div', 'sa-tiles sa-lead'); lead.forEach(function (h) { top.appendChild(card(h, h.photo ? 'grid-photo' : 'grid')); }); v.appendChild(top);
+      if (lead.length === all.length) return;
+      if (!gridAll) {
+        var m = btn('sa-gm', ''); m.appendChild(el('b', '', 'See all ' + all.length)); m.appendChild(el('span', '', 'hotels, shore by shore'));
+        m.style.gridColumn = 'span ' + (n - lead.length % n);
+        m.onclick = function () {
+          gridAll = true; track('section_expand', 'stay-grid-all', { count: all.length, mood: st.mood, shore: st.shore });
+          buildGrid(); var f = v.querySelector('.sa-shore .sa-card'); if (f) f.focus({ preventScroll: true });
+        };
+        top.appendChild(m); return;
+      }
       ['west', 'north', 'east', 'south'].forEach(function (s) {
         var hs = all.filter(function (h) { return h.area.shore === s && lead.indexOf(h) === -1; });
         if (!hs.length) return;
-        var sec = tint(el('section', 'sa-shore'), s), hd = el('header'), t = el('div', 'sa-tiles'), cap = hs.length > n + 1 ? n : hs.length;
+        var sec = tint(el('section', 'sa-shore'), s), hd = el('header'), t = el('div', 'sa-tiles');
         hd.appendChild(el('h3', '', SHORES[s][0])); hd.appendChild(el('span', '', SHORES[s][1] + ', ' + hs.length + (hs.length === 1 ? ' more stay' : ' more stays')));
-        hs.slice(0, cap).forEach(function (h) { t.appendChild(card(h, 'grid')); }); sec.appendChild(hd); sec.appendChild(t);
-        if (cap < hs.length) {
-          var m = btn('sa-gm', 'Show all ' + hs.length + ' on this shore'); m.setAttribute('aria-label', 'Show all ' + hs.length + ', ' + SHORES[s][0]);
-          m.onclick = function () {
-            track('section_expand', 'stay-grid-' + s, { count: hs.length });
-            hs.slice(cap).forEach(function (h) { t.appendChild(card(h, 'grid')); }); m.remove(); t.children[cap].focus({ preventScroll: true });
-          };
-          sec.appendChild(m);
-        }
-        v.appendChild(sec);
+        hs.forEach(function (h) { t.appendChild(card(h, 'grid')); }); sec.appendChild(hd); sec.appendChild(t); v.appendChild(sec);
       });
+      var less = btn('sa-gl', 'Show fewer');
+      less.onclick = function () { gridAll = false; buildGrid(); wrap.scrollIntoView(); };
+      v.appendChild(less);
     }
 
     // ---- state
