@@ -1205,10 +1205,14 @@
   .sa-shore h3 { font-family: 'Fraunces', serif; font-weight: 400; font-size: 28px; line-height: 1.2; color: var(--tint); }
   .sa-shore header span { color: var(--muted); font-size: 14px; }
   .sa-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 12px; }
+  .sa-lead { margin-bottom: 36px; }
+  .sa-gm { display: block; width: 100%; margin-top: 14px; padding: 12px; border: 1px solid var(--hair); border-radius: 4px; text-align: center; font: 600 13.5px 'Inter', sans-serif; color: var(--sand); }
+  .sa-gm:hover { border-color: var(--tint); color: var(--tint); }
   .sa-tiles .sa-card { display: flex; flex-direction: column; background: var(--ink-2); border-radius: 6px; overflow: hidden; }
   .sa-tiles .sa-body { flex: 1; grid-template-rows: auto auto 1fr auto; padding: 10px 11px 12px; }
   .sa-tiles .sa-nm { font-size: 16.5px; }
   .sa-tiles .sa-for { font-size: 0; }
+  .sa-tiles .sa-ar { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .sa-tiles .sa-cta { font-size: 12.5px; padding: 10px 4px; }
 
   .sa-ask { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px 24px; margin-top: 34px; padding-top: 22px; border-top: 1px solid var(--hair); }
@@ -1978,7 +1982,7 @@
         <h2 class="sa-sentence">We’re <select id="saMood" aria-label="Kind of trip"></select> and we’d wake up on <select id="saShore" aria-label="Which shore"></select></h2>
       </div>
       <div class="sa-modes" id="saModes" role="group" aria-label="Show hotels as">
-        <button type="button" data-m="map">Map</button><button type="button" data-m="guide">Guide</button><button type="button" data-m="grid">Grid</button>
+        <button type="button" data-m="grid">Grid</button><button type="button" data-m="map">Map</button><button type="button" data-m="guide">Guide</button>
       </div>
       <p class="sa-count" id="saCount" aria-live="polite"></p>
     </div>
@@ -2989,7 +2993,7 @@
     var TOP = 2; // hotels listed per coast on desktop until its heading is clicked
     var openArea = { l: null, r: null };
     var H = [], by = {}, GUIDE = [], fallback = null, coast = null;
-    var st = { mood: 'all', shore: 'all', mode: 'map', on: null, area: null };
+    var st = { mood: 'all', shore: 'all', mode: 'grid', on: null, area: null };
 
     function track(e, l, m) { if (window.trackEvent) window.trackEvent(e, l, m); }
     function el(t, c, txt) { var e = document.createElement(t); if (c) e.className = c; if (txt != null) e.textContent = txt; return e; }
@@ -3031,7 +3035,7 @@
       if (h.area.id === 'le-morne') d = [-50, 0];
       if (h.area.id === 'balaclava' || h.area.id === 'trou-aux-biches') d = [-55, 0];
       if (h.area.id === 'far-north') d = [20, -35];
-      var inland = { chamarel: 4, savanne: 6 }[h.area.id];
+      var inland = { chamarel: 4, savanne: 6 }[h.area.id] || (/^holiday-inn/.test(h.id) ? 4 : 0);
       if (inland) d = h.area.id === 'chamarel' ? [-90, 30] : [0, 60];
       if (h.area.id === 'port-louis') d = [-40, -35];
       var z = inland || 1; // inland: zoom out until the coast shows
@@ -3413,14 +3417,30 @@
         [].forEach.call($('saChaps').children, function (c) { io.observe(c); });
       }
     }
+    // Grid: hotels with photos first (topped up to full rows), then each shore with one row and a
+    // button for the rest. A filter that leaves few hotels lists them all.
+    var gridCols = 0;
+    function cols() { return small.matches ? 2 : Math.max(2, Math.floor(($('saGrid').clientWidth + 18) / 223)); }
     function buildGrid() {
-      var v = $('saGrid'); v.textContent = '';
+      var v = $('saGrid'), n = gridCols = cols(), all = H.filter(fits).sort(best); v.textContent = '';
+      var pics = all.filter(function (h) { return h.photo; }), rest = all.filter(function (h) { return !h.photo; });
+      var lead = all.length <= Math.max(n * 3, 12) ? pics.concat(rest) : pics.concat(rest).slice(0, Math.max(1, Math.ceil(pics.length / n)) * n);
+      var top = el('div', 'sa-tiles sa-lead'); lead.forEach(function (h) { top.appendChild(card(h, h.photo ? 'grid-photo' : 'grid')); }); v.appendChild(top);
       ['west', 'north', 'east', 'south'].forEach(function (s) {
-        var hs = H.filter(function (h) { return h.area.shore === s && fits(h); }).sort(best);
+        var hs = all.filter(function (h) { return h.area.shore === s && lead.indexOf(h) === -1; });
         if (!hs.length) return;
-        var sec = tint(el('section', 'sa-shore'), s), hd = el('header'), t = el('div', 'sa-tiles');
-        hd.appendChild(el('h3', '', SHORES[s][0])); hd.appendChild(el('span', '', SHORES[s][1] + ', ' + hs.length + (hs.length === 1 ? ' stay' : ' stays')));
-        hs.forEach(function (h) { t.appendChild(card(h, 'card')); }); sec.appendChild(hd); sec.appendChild(t); v.appendChild(sec);
+        var sec = tint(el('section', 'sa-shore'), s), hd = el('header'), t = el('div', 'sa-tiles'), cap = hs.length > n + 1 ? n : hs.length;
+        hd.appendChild(el('h3', '', SHORES[s][0])); hd.appendChild(el('span', '', SHORES[s][1] + ', ' + hs.length + (hs.length === 1 ? ' more stay' : ' more stays')));
+        hs.slice(0, cap).forEach(function (h) { t.appendChild(card(h, 'grid')); }); sec.appendChild(hd); sec.appendChild(t);
+        if (cap < hs.length) {
+          var m = btn('sa-gm', 'Show all ' + hs.length + ' on this shore'); m.setAttribute('aria-label', 'Show all ' + hs.length + ', ' + SHORES[s][0]);
+          m.onclick = function () {
+            track('section_expand', 'stay-grid-' + s, { count: hs.length });
+            hs.slice(cap).forEach(function (h) { t.appendChild(card(h, 'grid')); }); m.remove(); t.children[cap].focus({ preventScroll: true });
+          };
+          sec.appendChild(m);
+        }
+        v.appendChild(sec);
       });
     }
 
@@ -3488,14 +3508,14 @@
         buildMap(); buildNames(); pick(st.on);
       } else $('saModes').querySelector('[data-m="map"]').remove();
       if (!GUIDE.length) $('saModes').querySelector('[data-m="guide"]').remove();
-      mode(coast ? 'map' : 'grid', true);
-      var rt; window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(function () { if (map && st.mode === 'map') { setView(st.area ? view : full()); leaders(); } }, 80); });
+      mode('grid', true);
+      var rt; window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(function () { if (st.mode === 'grid' && cols() !== gridCols) buildGrid(); if (map && st.mode === 'map') { setView(st.area ? view : full()); leaders(); } }, 80); });
       if (small.addEventListener) small.addEventListener('change', function () { if (!map) return; if (st.area) unzoom(); cancelAnimationFrame(raf); setView(full()); $('saInland').removeAttribute('data-h'); pick(st.on); leaders(); });
       if (document.fonts && document.fonts.ready) document.fonts.ready.then(leaders);
       if (window.ResizeObserver) new ResizeObserver(leaders).observe($('saMap'));
       if (location.hash === '#where-to-stay') wrap.scrollIntoView();
       if ('IntersectionObserver' in window) {
-        var io = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { track('section_view', 'stays', { count: H.length, linked: H.filter(function (h) { return h.url; }).length }); io.disconnect(); } }, { rootMargin: '-35% 0px -35% 0px' });
+        var io = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { track('section_view', 'stays', { count: H.length, linked: H.filter(function (h) { return h.url; }).length, view: st.mode }); io.disconnect(); } }, { rootMargin: '-35% 0px -35% 0px' });
         io.observe(wrap);
       }
     }
