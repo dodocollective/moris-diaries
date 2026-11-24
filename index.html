@@ -1611,6 +1611,76 @@
     footer .coords { margin-left: 6px; }
   }
 
+  /* ================= SUN TO LATE — beach clubs, views, rooftops, live music, clubs ================= */
+  @property --sl-1 { syntax: '<color>'; inherits: true; initial-value: #2b2a4d; }
+  @property --sl-2 { syntax: '<color>'; inherits: true; initial-value: #c9622d; }
+  @property --sl-3 { syntax: '<color>'; inherits: true; initial-value: #f3b562; }
+  @property --sl-4 { syntax: '<color>'; inherits: true; initial-value: #b9683a; }
+  @property --sl-5 { syntax: '<color>'; inherits: true; initial-value: #23343a; }
+  @property --sl-6 { syntax: '<color>'; inherits: true; initial-value: #2a2430; }
+  .sl-wrap { --clay-hi: #E8834C; --ink-2: #14241f; --muted: #A39A8D; --hair: rgba(245,240,230,0.14); --north: #7CC4B1; --west: #E8834C; --east: #E9C27C; --south: #9DB7CE; margin: 8px 0 56px; scroll-margin-top: 16px; }
+  .sl-wrap[hidden] { display: none; }
+  :where(.sl-wrap) button { font: inherit; color: inherit; }
+  .sl-wrap :focus-visible { outline: 2px solid var(--clay-hi); outline-offset: 3px; border-radius: 3px; }
+  .sl-wrap .module-eyebrow { justify-content: flex-start; margin-bottom: 4px; }
+  .sl-wrap .sa-sentence { margin-bottom: 14px; }
+  /* ---- the horizon */
+  .sl-sky { position: relative; height: 184px; border-radius: 8px 8px 0 0; overflow: hidden; isolation: isolate; transition: --sl-1 .9s, --sl-2 .9s, --sl-3 .9s, --sl-4 .9s, --sl-5 .9s, --sl-6 .9s; background: linear-gradient(180deg, var(--sl-1), var(--sl-2) 46%, var(--sl-3) 70%); }
+  .sl-stars { position: absolute; inset: 0 0 30% 0; transition: opacity .9s; opacity: var(--sl-night, 0); }
+  .sl-stars i { position: absolute; width: 2px; height: 2px; border-radius: 50%; background: #fff; }
+  .sl-orb { position: absolute; left: 0; top: 0; width: 46px; height: 46px; margin: -23px 0 0 -23px; border-radius: 50%; background: #FFE9B8; box-shadow: 0 0 40px 14px rgba(255,214,140,.55); transition: transform .95s cubic-bezier(.4,0,.2,1), background .9s, box-shadow .9s; }
+  .sl-sky[data-dark="1"] .sl-orb { background: #E8ECF2; box-shadow: 0 0 26px 4px rgba(210,225,245,.35); }
+  .sl-sea { position: absolute; left: 0; right: 0; bottom: 0; height: 32%; background: linear-gradient(180deg, var(--sl-4), var(--sl-5)); }
+  .sl-glint { position: absolute; bottom: 0; left: 0; width: 120px; height: 32%; margin-left: -60px; background: repeating-linear-gradient(180deg, rgba(255,235,200,.5) 0 2px, transparent 2px 7px); -webkit-mask: linear-gradient(180deg, #000, transparent); mask: linear-gradient(180deg, #000, transparent); clip-path: polygon(38% 0, 62% 0, 100% 100%, 0 100%); transition: transform .95s cubic-bezier(.4,0,.2,1), opacity .9s; }
+  .sl-hills { position: absolute; left: 0; right: 0; bottom: 31.6%; width: 100%; height: 46%; display: block; fill: var(--sl-6); }
+  .sl-lamp { position: absolute; width: 22px; height: 22px; margin: -11px 0 0 -11px; padding: 0; border: 0; background: none; cursor: pointer; }
+  .sl-lamp::after { content: ''; position: absolute; left: 8px; top: 8px; width: 6px; height: 6px; border-radius: 50%; background: #FFD98F; box-shadow: 0 0 8px 2px rgba(255,200,110,.75); transition: transform .2s; }
+  .sl-lamp.on::after { transform: scale(2); background: #fff; }
+
+  .sl-stops { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); background: var(--ink-2); border-radius: 0 0 8px 8px; }
+  .sl-stops button { position: relative; border: 0; background: none; padding: 12px 2px 13px; cursor: pointer; text-align: center; color: var(--muted); min-width: 0; }
+  .sl-stops time { display: block; font-size: 11.5px; font-variant-numeric: tabular-nums; }
+  .sl-stops b { display: block; font-weight: 600; font-size: 14px; line-height: 1.25; }
+  .sl-stops button:hover { color: var(--sand); }
+  .sl-stops button[aria-pressed="true"] { color: var(--sand); }
+  .sl-stops button[aria-pressed="true"] time { color: var(--clay-hi); }
+  .sl-stops button::before { content: ''; position: absolute; left: 50%; top: -5px; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; background: var(--ink-2); box-shadow: inset 0 0 0 2px var(--muted); }
+  .sl-stops button[aria-pressed="true"]::before { background: var(--clay-hi); box-shadow: 0 0 0 4px rgba(232,131,76,.25); }
+
+  /* ---- places */
+  .sl-line { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; margin: 16px 0 10px; color: var(--muted); font-size: 14px; }
+  .sl-line b { color: var(--sand); font-weight: 600; }
+  .sl-rail { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x proximity; padding: 2px 0 10px; scrollbar-width: thin; scrollbar-color: rgba(245,240,230,.25) transparent; }
+  .sl-card { flex: 0 0 262px; scroll-snap-align: start; display: grid; grid-template-rows: auto auto 1fr auto auto; gap: 4px; padding: 15px 16px 16px; background: var(--ink-2); border-radius: 8px; transition: background .2s; min-width: 0; }
+  .sl-card.on, .sl-card:hover { background: #1a2f28; }
+  .sl-where { font-size: 12.5px; color: var(--muted); }
+  .sl-where b { color: var(--tint); font-weight: 600; }
+  .sl-name { font-family: 'Fraunces', serif; font-size: 21px; line-height: 1.18; margin: 0; font-weight: 400; text-wrap: balance; }
+  .sl-why { margin: 4px 0 0; font-size: 14px; line-height: 1.45; color: var(--sand-dim); }
+  .sl-hours { font-size: 12.5px; color: var(--muted); min-height: 1.5em; margin-top: 6px; }
+  .sl-acts { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-top: 8px; }
+  .sl-acts a { text-align: center; text-decoration: none; border-radius: 5px; padding: 10px 12px; font-size: 13.5px; font-weight: 600; }
+  .sl-web { background: var(--clay); color: #fff; }
+  .sl-web:hover { background: var(--clay-hi); color: var(--ink); }
+  .sl-map { border: 1px solid rgba(245,240,230,.28); color: var(--sand); }
+  .sl-map:hover { border-color: var(--sand); }
+  .sl-next { flex: 0 0 168px; border: 1px solid var(--hair); background: none; border-radius: 8px; cursor: pointer; text-align: center; color: var(--muted); font-size: 13.5px; padding: 14px; }
+  .sl-next b { display: block; font: italic 400 24px/1.2 'Fraunces', serif; color: var(--clay-hi); }
+  .sl-next:hover { border-color: var(--clay); }
+  .sl-empty { padding: 22px 0; color: var(--muted); }
+  .sl-empty button { border: 0; background: none; padding: 0; color: var(--clay-hi); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+  .sl-fine { font-size: 12px; color: var(--muted); margin: 8px 0 0; }
+  .sl-acts a:only-child { grid-column: 1 / -1; }
+  @media (max-width: 640px) {
+    .sl-sky { height: 156px; }
+    .sl-stops b { font-size: 12.5px; }
+    .sl-stops time { font-size: 10.5px; }
+    .sl-rail { margin-right: -20px; padding-right: 20px; scrollbar-width: none; }
+    .sl-rail::-webkit-scrollbar { display: none; }
+    .sl-card { flex-basis: min(80%, 290px); }
+  }
+  @media (prefers-reduced-motion: reduce) { .sl-wrap * { transition: none !important; } }
+
   /* ================= TEXT MOTION — "the diary writes itself" =================
      The script at the end of the page adds .ink (waiting) and .ink-on (writing). Without it,
      or with reduced motion, every word simply shows. */
@@ -1765,6 +1835,7 @@
       <a href="#flights">✈️ Flights</a>
       <a href="#where-to-stay">🏨 Where to Stay</a>
       <a href="#activities">🌊 Activities</a>
+      <a href="#sun-to-late">🌅 Sun to Late</a>
       <a href="#trip-concierge">🗺️ Itineraries</a>
       <a href="#car-rental">🚗 Car hire</a>
     </nav>
@@ -2059,6 +2130,25 @@
 
     <p class="activities-disclosure" id="activitiesDisclosure" style="display:none;">Some activities on this page are booked through travel affiliates — we may earn a small commission on qualifying bookings, at no extra cost to you.</p>
   </div>
+
+  <!-- Sun to Late — beach clubs, restaurants with a view, rooftops, live music and clubs, from
+       Supabase `web_spots` (add a row and it shows). Hidden until it has places to show. -->
+  <section class="sl-wrap" id="sun-to-late" hidden aria-label="Beach clubs, restaurants with a view, bars and nightclubs">
+    <div class="module-eyebrow">✦ Sun to Late</div>
+    <h2 class="sa-sentence">Take us to <select id="slWhen" aria-label="What for"></select> <select id="slWhere" aria-label="Which coast"></select></h2>
+    <div class="sl-sky" id="slSky">
+      <div class="sl-stars" id="slStars" aria-hidden="true"></div>
+      <div class="sl-orb" id="slOrb" aria-hidden="true"></div>
+      <svg class="sl-hills" viewBox="0 0 1000 100" preserveAspectRatio="none" aria-hidden="true"><path d="M0 100V92C40 90 70 86 96 76C110 70 118 48 130 34C136 27 146 23 160 22C186 20 214 20 236 22C250 24 254 36 262 52C270 66 284 76 306 82C350 92 400 93 448 92C486 91 512 84 534 72C546 64 552 46 562 42C571 39 577 50 588 58C606 70 622 60 640 46C650 38 656 20 664 12C670 18 676 40 690 48C706 56 720 44 734 34C742 28 747 12 755 8C763 14 768 34 782 46C806 64 850 70 884 80C920 88 960 90 1000 90V100Z"/></svg>
+      <div class="sl-sea" aria-hidden="true"></div>
+      <div class="sl-glint" id="slGlint" aria-hidden="true"></div>
+      <div id="slLamps"></div>
+    </div>
+    <div class="sl-stops" id="slStops" role="group" aria-label="Time of day"></div>
+    <div class="sl-line"><span id="slCount" aria-live="polite"></span></div>
+    <div class="sl-rail" id="slRail"></div>
+    <p class="sl-fine">Opening days change, so check with the place before you go.</p>
+  </section>
 
   <div class="section-divider">
     <svg viewBox="0 0 400 24" preserveAspectRatio="none">
@@ -3851,6 +3941,132 @@
         }
       })
       .catch(function () { /* strip stays hidden */ });
+  })();
+</script>
+
+<script>
+  // Sun to Late — places from Supabase `web_spots`, by time of day. Events: section_view
+  // ('sun-to-late', once), spot_click (label = place; type website|map, moment, coast, position),
+  // spot_moment (label = time of day; via stop|sentence|next), spot_filter (coast), spot_light
+  // (a light on the shore), spot_swipe (the row, once per time of day). Also jump_click, for the
+  // quick links under the banner.
+  (function () {
+    var SUPABASE_URL = "https://uyavmmgignbwbfhzwyjl.supabase.co";
+    var SUPABASE_ANON_KEY = "sb_publishable_LIKG4Yp7PQ7oCHPzGepuBA_aBsHvsN8";
+    function track(n, l, m) { if (window.trackEvent) window.trackEvent(n, l, m); }
+    [].forEach.call(document.querySelectorAll('.jump-chips a'), function (a) {
+      a.addEventListener('click', function () { track('jump_click', a.getAttribute('href').slice(1)); });
+    });
+    var wrap = document.getElementById('sun-to-late');
+    if (!wrap) return;
+    var still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // id, time, short label, words in the sentence, height of the sun or moon, sky colours, how dark
+    var STOPS = [
+      { id: 'beach',  t: '11:00', b: 'Beach',  s: 'a beach club',        y: .24, sky: ['#3a8fb0', '#7cc1cf', '#d9ece2', '#5fb8ac', '#2d7a78', '#2f5a4d'], n: 0 },
+      { id: 'lunch',  t: '13:00', b: 'Lunch',  s: 'lunch with a view',   y: .13, sky: ['#2f86b3', '#74bcd2', '#e3eee0', '#57b5b0', '#23706f', '#2b5848'], n: 0 },
+      { id: 'sunset', t: '17:45', b: 'Sunset', s: 'sunset drinks',       y: .60, sky: ['#3b3560', '#c9622d', '#f6bd6b', '#c47442', '#28383d', '#2c2431'], n: .12 },
+      { id: 'dinner', t: '19:30', b: 'Dinner', s: 'a special dinner',    y: .30, sky: ['#10192e', '#2b3157', '#8a4a4d', '#3b3c55', '#131f2a', '#141a24'], n: .6 },
+      { id: 'live',   t: '21:30', b: 'Live',   s: 'live music',          y: .22, sky: ['#091322', '#142340', '#2c3a5c', '#1c2b45', '#0c1620', '#0b131c'], n: .9 },
+      { id: 'late',   t: '00:00', b: 'Late',   s: 'a late night out',    y: .16, sky: ['#060c16', '#0c1730', '#33224f', '#1a1d38', '#080e18', '#070d15'], n: 1 }
+    ];
+    var COAST = { north: ['The north', 'up north'], west: ['The west', 'on the west coast'], south: ['The south', 'down south'], east: ['The east', 'on the east coast'], town: ['Port Louis and the centre', 'in town or the hills'] };
+    var TINT = { north: 'var(--north)', west: 'var(--west)', south: 'var(--south)', east: 'var(--east)', town: 'var(--sand-dim)' };
+    var P = [], now = 'sunset', where = 'all', swiped = {}, auto = false;
+    function $(id) { return document.getElementById(id); }
+    function el(t, c, x) { var e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; }
+    function btn(c, x) { var b = el('button', c, x); b.type = 'button'; return b; }
+    function index(id) { for (var i = 0; i < STOPS.length; i++) if (STOPS[i].id === id) return i; return 0; }
+    function list() { return P.filter(function (p) { return p.moments.indexOf(now) > -1 && (where === 'all' || p.coast === where); }); }
+    function go(id, via) { if (id === now) return; now = id; track('spot_moment', id, { via: via, coast: where }); draw(); }
+    function gmap(p) { return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(p.name + ', ' + p.place + ', Mauritius'); }
+    function out(a, p, type, pos) {
+      a.target = '_blank'; a.rel = 'noopener';
+      a.addEventListener('click', function () { track('spot_click', p.name, { type: type, id: p.id, moment: now, coast: p.coast, place: p.place, position: pos, filter: where }); });
+    }
+    function quiet(ms) { auto = true; clearTimeout(quiet.t); quiet.t = setTimeout(function () { auto = false; }, ms); }
+    function draw() {
+      var n = index(now), S = STOPS[n], sky = $('slSky'), ps = list(), lamps = $('slLamps'), rail = $('slRail'), count = $('slCount');
+      $('slWhen').value = now; $('slWhere').value = where;
+      [].forEach.call($('slStops').children, function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-s') === now); });
+      S.sky.forEach(function (c, i) { sky.style.setProperty('--sl-' + (i + 1), c); });
+      sky.style.setProperty('--sl-night', S.n); sky.setAttribute('data-dark', S.n > 0.5 ? 1 : 0);
+      put();
+      lamps.textContent = ''; rail.textContent = ''; quiet(300); rail.scrollLeft = 0;
+      count.textContent = '';
+      count.appendChild(el('b', '', ps.length + (ps.length === 1 ? ' place' : ' places')));
+      count.appendChild(document.createTextNode(' for ' + S.s + (where === 'all' ? ' around the island' : ' ' + COAST[where][1])));
+      ps.forEach(function (p, i) {
+        var l = btn('sl-lamp'); l.setAttribute('aria-label', 'Show ' + p.name);
+        l.style.left = (6 + 88 * (i + 0.5) / ps.length) + '%'; l.style.top = (67 + (i % 3) * 2.2) + '%';
+        var c = el('article', 'sl-card'); c.style.setProperty('--tint', TINT[p.coast]);
+        var w = el('div', 'sl-where'); w.appendChild(el('b', '', COAST[p.coast][0])); w.appendChild(document.createTextNode(' · ' + p.place));
+        c.appendChild(w); c.appendChild(el('h3', 'sl-name', p.name)); c.appendChild(el('p', 'sl-why', p.blurb || '')); c.appendChild(el('div', 'sl-hours', p.hours || ''));
+        var a = el('div', 'sl-acts'), url = /^https?:\/\//i.test(p.website_url || '') ? p.website_url : '';
+        if (url) {
+          var b = el('a', 'sl-web', /facebook\.com/i.test(url) ? 'See on Facebook' : 'Visit website'); b.href = url;
+          b.setAttribute('aria-label', b.textContent + ', ' + p.name); out(b, p, 'website', i + 1); a.appendChild(b);
+        }
+        var m = el('a', 'sl-map', url ? 'Map' : 'See on the map'); m.href = gmap(p); m.setAttribute('aria-label', m.textContent + ', ' + p.name); out(m, p, 'map', i + 1); a.appendChild(m);
+        c.appendChild(a);
+        function lit(v) { l.classList.toggle('on', v); c.classList.toggle('on', v); }
+        c.onmouseenter = l.onmouseenter = function () { lit(true); }; c.onmouseleave = l.onmouseleave = function () { lit(false); };
+        l.onclick = function () {
+          track('spot_light', p.name, { moment: now, coast: p.coast });
+          quiet(900); rail.scrollTo({ left: c.offsetLeft - rail.offsetLeft, behavior: still ? 'auto' : 'smooth' });
+          lit(true); setTimeout(function () { lit(false); }, 1400);
+        };
+        lamps.appendChild(l); rail.appendChild(c);
+      });
+      if (!ps.length) {
+        var e = el('div', 'sl-empty', 'Nothing on our list here yet. '), r = btn('', 'Look anywhere');
+        r.onclick = function () { where = 'all'; track('spot_filter', 'all', { moment: now, from: 'empty' }); draw(); };
+        e.appendChild(r); rail.appendChild(e);
+      }
+      var N = STOPS[n + 1];
+      if (N) { var nx = btn('sl-next', 'And after that?'); nx.appendChild(el('b', '', N.b)); nx.onclick = function () { go(N.id, 'next'); }; rail.appendChild(nx); }
+    }
+    function put() {
+      var sky = $('slSky'), n = index(now), x = sky.clientWidth * (n + 0.5) / STOPS.length, y = sky.clientHeight * STOPS[n].y;
+      $('slOrb').style.transform = 'translate(' + x + 'px,' + y + 'px)';
+      $('slGlint').style.transform = 'translateX(' + x + 'px)'; $('slGlint').style.opacity = STOPS[n].n > 0.5 ? 0.35 : 0.9;
+    }
+    function start(rows) {
+      P = rows.filter(function (p) { return COAST[p.coast] && (p.moments || []).length; });
+      STOPS = STOPS.filter(function (s) { return P.some(function (p) { return p.moments.indexOf(s.id) > -1; }); });
+      if (!STOPS.length) return;
+      now = STOPS.some(function (s) { return s.id === now; }) ? now : STOPS[0].id;
+      $('slStops').style.gridTemplateColumns = 'repeat(' + STOPS.length + ', minmax(0, 1fr))';
+      STOPS.forEach(function (s) {
+        var o = el('option', '', s.s), b = btn(''); o.value = s.id; $('slWhen').appendChild(o);
+        b.setAttribute('data-s', s.id); b.appendChild(el('time', '', s.t)); b.appendChild(el('b', '', s.b));
+        b.onclick = function () { go(s.id, 'stop'); }; $('slStops').appendChild(b);
+      });
+      [['all', 'anywhere.']].concat(Object.keys(COAST).filter(function (k) { return P.some(function (p) { return p.coast === k; }); }).map(function (k) { return [k, COAST[k][1] + '.']; })).forEach(function (w) {
+        var o = el('option', '', w[1]); o.value = w[0]; $('slWhere').appendChild(o);
+      });
+      $('slWhen').onchange = function () { go(this.value, 'sentence'); };
+      $('slWhere').onchange = function () { where = this.value; track('spot_filter', where, { moment: now }); draw(); };
+      // a fixed spread of stars, so they don't jump between visits
+      for (var k = 0; k < 64; k++) { var i = el('i'); i.style.left = (k * 61.8 % 100) + '%'; i.style.top = (k * 37.7 % 96) + '%'; i.style.opacity = 0.35 + (k * 29 % 60) / 100; $('slStars').appendChild(i); }
+      $('slRail').addEventListener('scroll', function () {
+        if (auto || swiped[now] || this.scrollLeft < 40) return;
+        swiped[now] = true; track('spot_swipe', now, { coast: where });
+      }, { passive: true });
+      wrap.hidden = false;
+      draw();
+      window.addEventListener('resize', put);
+      if (location.hash === '#sun-to-late') wrap.scrollIntoView();
+      if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (es) {
+          if (es[0].isIntersecting) { track('section_view', 'sun-to-late', { count: P.length, websites: P.filter(function (p) { return p.website_url; }).length }); io.disconnect(); }
+        }, { threshold: 0.4 });
+        io.observe(wrap);
+      }
+    }
+    fetch(SUPABASE_URL + '/rest/v1/web_spots?select=id,name,place,coast,moments,blurb,hours,website_url&is_active=eq.true&order=sort_order.asc,id.asc', { headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY } })
+      .then(function (r) { if (!r.ok) throw new Error('web_spots fetch failed: ' + r.status); return r.json(); })
+      .then(start)
+      .catch(function () { /* section stays hidden */ });
   })();
 </script>
 
