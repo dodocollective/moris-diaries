@@ -2678,14 +2678,15 @@
 
       var priceEl = document.createElement('div');
       priceEl.className = 'activity-price';
-      var price = fmtPrice(activity.adult_price);
+      // Andeor prices in the database are often out of date, so those cards don't show one.
+      var price = kind === 'andeor' ? null : fmtPrice(activity.adult_price);
       if (price) {
         priceEl.innerHTML = 'from ';
         var b = document.createElement('b');
         b.textContent = price;
         priceEl.appendChild(b);
       } else {
-        priceEl.textContent = 'See price';
+        priceEl.textContent = kind === 'andeor' && !canBookDirect ? 'Ask for price' : 'See price';
       }
       foot.appendChild(priceEl);
 
